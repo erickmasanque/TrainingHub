@@ -3,204 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OWL Training Hub</title>
+    <title>Azure & Copilot Studio - Support Process Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Light gray background for the page */
         }
-        .sidebar {
-            background-color: #4A0072; /* Dark purple from the design */
-        }
-        .header {
-            background-color: #6D28D9; /* A slightly lighter purple for header based on design */
-        }
-        .card {
-            background-color: white;
-            border-radius: 0.75rem; /* 12px */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .course-card {
-            background-color: #F3E8FF; /* Light purple for course cards */
-            border: 1px solid #D8B4FE;
-        }
-        .course-card-recommended {
-            background-color: #5B21B6; /* Darker purple for recommended courses */
-            color: white;
-        }
-        .course-card-recommended .prerequisite {
-            font-size: 0.75rem; /* 12px */
-            color: #E9D5FF;
-        }
-        .pie-chart-placeholder {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: conic-gradient(#34D399 38%, #FDBA74 38% 100%); /* Green for completed, Orange for recommended */
+        /* Styling for the connecting arrows */
+        .phase-connector {
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            color: #9ca3af; /* gray-400 */
+        }
+        .phase-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .phase-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .step-item li {
             position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
         }
-        .pie-chart-placeholder::before {
-            content: '';
+        .step-item li::before {
+            content: '✓';
             position: absolute;
-            width: 60%;
-            height: 60%;
-            background: white;
+            left: 0;
+            top: 2px;
+            color: #3b82f6; /* blue-500 */
+            font-weight: 600;
             border-radius: 50%;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.875rem; /* 14px */
-        }
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 0.125rem; /* 2px */
-            margin-right: 0.5rem; /* 8px */
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
         }
     </style>
 </head>
-<body class="flex h-screen">
+<body class="bg-slate-50 text-slate-800">
 
-    <aside class="sidebar w-20 md:w-64 flex flex-col items-center md:items-start p-4 space-y-6 text-white">
-        <div class="text-2xl font-bold mb-10 flex items-center justify-center md:justify-start w-full">
-            <i class="fas fa-feather-alt text-3xl md:mr-3"></i>
-            <span class="hidden md:inline">OWL</span>
-        </div>
-        <nav class="space-y-3 w-full">
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-purple-700 transition-colors">
-                <i class="fas fa-tachometer-alt fa-fw w-6 text-center md:mr-3"></i>
-                <span class="hidden md:inline">Dashboard</span>
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg bg-purple-700 transition-colors"> <i class="fas fa-book fa-fw w-6 text-center md:mr-3"></i>
-                <span class="hidden md:inline">Courses</span>
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-purple-700 transition-colors">
-                <i class="fas fa-calendar-alt fa-fw w-6 text-center md:mr-3"></i>
-                <span class="hidden md:inline">Schedule</span>
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-purple-700 transition-colors">
-                <i class="fas fa-certificate fa-fw w-6 text-center md:mr-3"></i>
-                <span class="hidden md:inline">Certificates</span>
-            </a>
-        </nav>
-        <div class="mt-auto hidden md:block p-3">
-            <p class="text-xs text-purple-300">&copy; 2024 OWL Training</p>
-        </div>
-    </aside>
-
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <header class="header p-4 shadow-md text-white flex justify-between items-center">
-            <h1 class="text-xl md:text-2xl font-semibold">OWL Training Hub</h1>
-            <div class="flex items-center space-x-4">
-                <button class="relative hover:text-purple-200">
-                    <i class="fas fa-bell text-xl"></i>
-                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                </button>
-                <button class="hover:text-purple-200">
-                    <i class="fas fa-user-circle text-2xl"></i>
-                </button>
-            </div>
+    <div class="container mx-auto px-4 py-8 md:px-8 md:py-12">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Technical Support Process Flow</h1>
+            <p class="mt-2 text-lg text-slate-600">Azure SQL Database for Copilot Studio (Developer Support)</p>
         </header>
 
-        <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                <div class="lg:col-span-2 space-y-6">
-                    <section class="card p-6">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-700">Learning & Certificates</h2>
-                        <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                            <div class="pie-chart-placeholder">
-                                </div>
-                            <div class="space-y-2 pt-4 sm:pt-0">
-                                <div class="legend-item">
-                                    <span class="legend-color" style="background-color: #34D399;"></span>
-                                    <span>38% Completed</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color" style="background-color: #FDBA74;"></span>
-                                    <span>62% Recommended</span>
-                                </div>
-                                <p class="text-sm text-gray-500 mt-2">Overview of your progress and pending recommendations.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="card p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold text-gray-700">My Courses</h2>
-                            <a href="#" class="text-sm font-medium text-purple-600 hover:text-purple-800">View All</a>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="course-card p-4 rounded-lg flex items-start space-x-3">
-                                <img src="https://placehold.co/80x80/A78BFA/FFFFFF?text=WFM" alt="Workforce Management 101" class="w-16 h-16 md:w-20 md:h-20 object-cover rounded-md">
-                                <div>
-                                    <h3 class="font-semibold text-gray-800">Workforce Management 101</h3>
-                                    <p class="text-sm text-gray-600">Fundamentals of WFM.</p>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                                        <div class="bg-green-500 h-2.5 rounded-full" style="width: 75%"></div>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-1">75% Complete</p>
-                                </div>
-                            </div>
-                            <div class="course-card p-4 rounded-lg flex items-start space-x-3">
-                                <img src="https://placehold.co/80x80/C4B5FD/FFFFFF?text=Excel" alt="EXCEL Expo" class="w-16 h-16 md:w-20 md:h-20 object-cover rounded-md">
-                                <div>
-                                    <h3 class="font-semibold text-gray-800">EXCEL Expo</h3>
-                                    <p class="text-sm text-gray-600">Advanced Excel techniques.</p>
-                                     <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                                        <div class="bg-blue-500 h-2.5 rounded-full" style="width: 40%"></div>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-1">40% Complete</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+        <!-- Main Process Flow Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            <!-- Phase 1: Initial Setup -->
+            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
+                <div class="flex-shrink-0 mb-4">
+                    <span class="inline-block bg-blue-100 text-blue-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 1</span>
+                    <h2 class="text-xl font-bold mt-2">Initial Setup & Configuration</h2>
                 </div>
+                <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
+                    <li><strong>Verify SQL DB Setup:</strong> Check service tier and collation settings.</li>
+                    <li><strong>Network & Firewall:</strong> Confirm client IP is allowed and Azure services can access.</li>
+                    <li><strong>App Registration:</strong> Validate service principal exists and has DB user mapping.</li>
+                    <li><strong>Connection String:</strong> Assist with format and advise on using Key Vault for secrets.</li>
+                </ul>
+            </div>
 
-                <div class="lg:col-span-1 space-y-6">
-                    <section class="card p-6">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-700">Recommended Courses</h2>
-                        <div class="space-y-4">
-                            <div class="course-card-recommended p-4 rounded-lg flex items-start space-x-3 shadow-lg">
-                                <img src="https://placehold.co/60x60/FFFFFF/5B21B6?text=SEC" alt="SEC 101" class="w-12 h-12 md:w-16 md:h-16 object-cover rounded-md">
-                                <div>
-                                    <h3 class="font-semibold">SEC 101</h3>
-                                    <p class="text-sm text-purple-200">Introduction to Security.</p>
-                                </div>
-                            </div>
-                            <div class="course-card-recommended p-4 rounded-lg flex items-start space-x-3 shadow-lg">
-                                <img src="https://placehold.co/60x60/FFFFFF/5B21B6?text=TPS" alt="TPS 101" class="w-12 h-12 md:w-16 md:h-16 object-cover rounded-md">
-                                <div>
-                                    <h3 class="font-semibold">TPS 101</h3>
-                                    <p class="prerequisite">(Prerequisite - SEC 101)</p>
-                                </div>
-                            </div>
-                            <div class="course-card-recommended p-4 rounded-lg flex items-start space-x-3 shadow-lg">
-                                <img src="https://placehold.co/60x60/FFFFFF/5B21B6?text=NICE" alt="NICE IEX Scheduling" class="w-12 h-12 md:w-16 md:h-16 object-cover rounded-md">
-                                <div>
-                                    <h3 class="font-semibold">NICE IEX Scheduling</h3>
-                                    <p class="text-sm text-purple-200">Master NICE IEX.</p>
-                                </div>
-                            </div>
-                            <div class="course-card-recommended p-4 rounded-lg flex items-start space-x-3 shadow-lg">
-                                <img src="https://placehold.co/60x60/FFFFFF/5B21B6?text=Forecast" alt="Forecasting 101" class="w-12 h-12 md:w-16 md:h-16 object-cover rounded-md">
-                                <div>
-                                    <h3 class="font-semibold">Forecasting 101</h3>
-                                    <p class="text-sm text-purple-200">Basics of forecasting.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+            <!-- Phase 2: Data Ingestion -->
+            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
+                 <div class="flex-shrink-0 mb-4">
+                    <span class="inline-block bg-indigo-100 text-indigo-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 2</span>
+                    <h2 class="text-xl font-bold mt-2">Data Ingestion (One-Time)</h2>
+                </div>
+                <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
+                    <li><strong>Storage Account Access:</strong> Ensure data file exists and permissions (Storage Blob Data Reader) are set.</li>
+                    <li><strong>Review Ingestion Method:</strong> Check tool used (e.g., Azure Data Factory, Function App).</li>
+                    <li><strong>Troubleshoot Function App:</strong> Review triggers, dependencies, and application settings.</li>
+                    <li><strong>Verify Data Schema:</strong> Query target table post-ingestion for correctness and header mapping.</li>
+                </ul>
+            </div>
+
+            <!-- Phase 3: Copilot Integration -->
+            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
+                <div class="flex-shrink-0 mb-4">
+                    <span class="inline-block bg-purple-100 text-purple-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 3</span>
+                    <h2 class="text-xl font-bold mt-2">Copilot Studio Integration</h2>
+                </div>
+                 <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
+                    <li><strong>Check Copilot Connector:</strong> Verify SQL Server connector and its authentication setup.</li>
+                    <li><strong>Troubleshoot Read Access:</strong> Test the exact query from Copilot directly against the DB.</li>
+                    <li><strong>Support Write-Back:</strong> Advise on using Stored Procedures and grant necessary permissions.</li>
+                    <li><strong>Debug API Calls:</strong> Review Power Automate flow history for detailed error messages.</li>
+                </ul>
+            </div>
+            
+            <!-- Phase 4: Troubleshooting -->
+            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
+                 <div class="flex-shrink-0 mb-4">
+                    <span class="inline-block bg-pink-100 text-pink-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 4</span>
+                    <h2 class="text-xl font-bold mt-2">General Troubleshooting</h2>
+                </div>
+                 <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
+                    <li><strong>Analyze Error Logs:</strong> Use Azure Monitor and Application Insights for detailed logs.</li>
+                    <li><strong>Isolate Problem:</strong> Systematically test each component in the chain to find the failure point.</li>
+                    <li><strong>Consult Documentation:</strong> Refer to official Microsoft Learn docs for best practices.</li>
+                    <li><strong>Escalate if Unresolved:</strong> Pass to a senior dev with a clear summary of steps taken.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Resolution Section -->
+        <div class="mt-12 text-center">
+             <div class="inline-block phase-connector mx-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M12 5v14m-7-7h14"/></svg>
+            </div>
+            <div class="bg-green-100 border-t-4 border-green-500 rounded-b text-green-900 px-4 py-3 shadow-md inline-block" role="alert">
+                <div class="flex">
+                    <div class="py-1"><svg class="fill-current h-6 w-6 text-green-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM12.707 8.707a1 1 0 0 0-1.414-1.414L8 10.586 6.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z"/></svg></div>
+                    <div>
+                        <p class="font-bold">Resolution & Documentation</p>
+                        <p class="text-sm">Document the solution in the knowledge base to help with future requests.</p>
+                    </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 </body>
 </html>
