@@ -3,134 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure & Copilot Studio - Support Process Flow</title>
+    <title>Student Diversity Presentation</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
+        html, body {
             font-family: 'Inter', sans-serif;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevents scrollbars */
         }
-        /* Styling for the connecting arrows */
-        .phase-connector {
+        .slide {
+            display: none;
+        }
+        .slide.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: #9ca3af; /* gray-400 */
         }
-        .phase-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .phase-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-        .step-item li {
-            position: relative;
-            padding-left: 28px;
-            margin-bottom: 12px;
-        }
-        .step-item li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            top: 2px;
-            color: #3b82f6; /* blue-500 */
-            font-weight: 600;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            text-align: center;
-            line-height: 20px;
+        .speaker-notes {
+            display: none;
+            transition: all 0.3s ease-in-out;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-gray-800">
 
-    <div class="container mx-auto px-4 py-8 md:px-8 md:py-12">
-        <!-- Header -->
-        <header class="text-center mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Technical Support Process Flow</h1>
-            <p class="mt-2 text-lg text-slate-600">Azure SQL Database for Copilot Studio (Developer Support)</p>
-        </header>
-
-        <!-- Main Process Flow Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            
-            <!-- Phase 1: Initial Setup -->
-            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
-                <div class="flex-shrink-0 mb-4">
-                    <span class="inline-block bg-blue-100 text-blue-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 1</span>
-                    <h2 class="text-xl font-bold mt-2">Initial Setup & Configuration</h2>
-                </div>
-                <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
-                    <li><strong>Verify SQL DB Setup:</strong> Check service tier and collation settings.</li>
-                    <li><strong>Network & Firewall:</strong> Confirm client IP is allowed and Azure services can access.</li>
-                    <li><strong>App Registration:</strong> Validate service principal exists and has DB user mapping.</li>
-                    <li><strong>Connection String:</strong> Assist with format and advise on using Key Vault for secrets.</li>
-                </ul>
-            </div>
-
-            <!-- Phase 2: Data Ingestion -->
-            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
-                 <div class="flex-shrink-0 mb-4">
-                    <span class="inline-block bg-indigo-100 text-indigo-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 2</span>
-                    <h2 class="text-xl font-bold mt-2">Data Ingestion (One-Time)</h2>
-                </div>
-                <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
-                    <li><strong>Storage Account Access:</strong> Ensure data file exists and permissions (Storage Blob Data Reader) are set.</li>
-                    <li><strong>Review Ingestion Method:</strong> Check tool used (e.g., Azure Data Factory, Function App).</li>
-                    <li><strong>Troubleshoot Function App:</strong> Review triggers, dependencies, and application settings.</li>
-                    <li><strong>Verify Data Schema:</strong> Query target table post-ingestion for correctness and header mapping.</li>
-                </ul>
-            </div>
-
-            <!-- Phase 3: Copilot Integration -->
-            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
-                <div class="flex-shrink-0 mb-4">
-                    <span class="inline-block bg-purple-100 text-purple-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 3</span>
-                    <h2 class="text-xl font-bold mt-2">Copilot Studio Integration</h2>
-                </div>
-                 <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
-                    <li><strong>Check Copilot Connector:</strong> Verify SQL Server connector and its authentication setup.</li>
-                    <li><strong>Troubleshoot Read Access:</strong> Test the exact query from Copilot directly against the DB.</li>
-                    <li><strong>Support Write-Back:</strong> Advise on using Stored Procedures and grant necessary permissions.</li>
-                    <li><strong>Debug API Calls:</strong> Review Power Automate flow history for detailed error messages.</li>
-                </ul>
-            </div>
-            
-            <!-- Phase 4: Troubleshooting -->
-            <div class="phase-card bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col">
-                 <div class="flex-shrink-0 mb-4">
-                    <span class="inline-block bg-pink-100 text-pink-600 text-sm font-semibold px-3 py-1 rounded-full">Phase 4</span>
-                    <h2 class="text-xl font-bold mt-2">General Troubleshooting</h2>
-                </div>
-                 <ul class="step-item text-slate-600 text-sm space-y-3 flex-grow">
-                    <li><strong>Analyze Error Logs:</strong> Use Azure Monitor and Application Insights for detailed logs.</li>
-                    <li><strong>Isolate Problem:</strong> Systematically test each component in the chain to find the failure point.</li>
-                    <li><strong>Consult Documentation:</strong> Refer to official Microsoft Learn docs for best practices.</li>
-                    <li><strong>Escalate if Unresolved:</strong> Pass to a senior dev with a clear summary of steps taken.</li>
-                </ul>
-            </div>
+    <div id="presentation-container" class="w-screen h-screen bg-white flex flex-col relative">
+        <!-- This new wrapper will hold the slides, leaving the controls untouched -->
+        <div id="slides-wrapper" class="w-full h-full">
+             <!-- Slides will be injected here by JavaScript -->
         </div>
-
-        <!-- Resolution Section -->
-        <div class="mt-12 text-center">
-             <div class="inline-block phase-connector mx-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M12 5v14m-7-7h14"/></svg>
-            </div>
-            <div class="bg-green-100 border-t-4 border-green-500 rounded-b text-green-900 px-4 py-3 shadow-md inline-block" role="alert">
-                <div class="flex">
-                    <div class="py-1"><svg class="fill-current h-6 w-6 text-green-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM12.707 8.707a1 1 0 0 0-1.414-1.414L8 10.586 6.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z"/></svg></div>
-                    <div>
-                        <p class="font-bold">Resolution & Documentation</p>
-                        <p class="text-sm">Document the solution in the knowledge base to help with future requests.</p>
-                    </div>
+        
+        <!-- Navigation Controls -->
+        <div class="absolute bottom-0 left-0 right-0 z-10 p-4 bg-black bg-opacity-20 backdrop-blur-sm">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <button id="prevBtn" class="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <div class="text-center">
+                    <span id="slide-counter" class="text-white font-semibold"></span>
+                    <button id="toggleNotesBtn" class="ml-4 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-500 transition-colors">Toggle Speaker Notes</button>
                 </div>
+                <button id="nextBtn" class="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
             </div>
         </div>
     </div>
+
+
+    <script>
+        const slides = [
+            // Slide 1: Title Slide
+            {
+                title: "Module 4, Unit 2.2: Student Diversity",
+                content: `
+                    <div class="text-center">
+                        <h2 class="text-3xl md:text-4xl font-medium text-gray-600 mb-4">A Report on Learner-Centered Principles</h2>
+                    </div>
+                `,
+                footer: `
+                    <div class="w-full text-center text-xl md:text-2xl text-gray-500">
+                        <p><span class="font-bold">Course:</span> Facilitating Learner-Centered Teaching</p>
+                        <p><span class="font-bold">Presenters:</span> Group 1</p>
+                        <p><span class="font-bold">Date:</span> July 30, 2025</p>
+                    </div>
+                `,
+                notes: "Magandang hapon po sa inyong lahat. We are Group 1, and today we will be reporting on a very important topic from Module 4, Unit 2.2, which is 'Student Diversity.' This module challenges us to look at the differences in our classrooms not as obstacles, but as a rich resource for learning."
+            },
+            // Slide 2: Agenda & Hook
+            {
+                title: "Our Roadmap",
+                content: `
+                    <div class="w-full text-left max-w-4xl">
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8">
+                            <p class="font-bold text-2xl text-blue-800">Hook Question:</p>
+                            <p class="text-xl text-gray-700 italic">Have you ever been in a group project and realized that each member, with their unique skills and backgrounds—one from Luzon, another from Visayas, maybe one who is great at art, and another at speaking—actually made the final output better?</p>
+                        </div>
+                        <ol class="list-decimal list-inside text-2xl space-y-2 text-gray-800">
+                            <li>Defining Student Diversity</li>
+                            <li>The Factors of Diversity</li>
+                            <li>The Benefits of Diversity</li>
+                            <li>Principle 1: Balancing Diversity with Unity</li>
+                            <li>Principle 2: Differentiating Instruction & Assessment</li>
+                            <li>Connecting to the Philippine Context</li>
+                            <li>Case Study & Practical Applications</li>
+                            <li>Group Discussion</li>
+                        </ol>
+                    </div>
+                `,
+                notes: "Let's start with a question. Think about your own experiences as students here. Have you ever been in a group project and realized that the mix of people—maybe someone from a different province, someone who speaks a different dialect, someone who's introverted, someone who's extroverted—actually led to a more creative and comprehensive result? That synergy is at the heart of what we'll discuss today. Our roadmap will cover the definition, factors, and benefits of diversity, two core principles for the classroom, and how we can apply them in the Philippine context."
+            },
+            // Slide 3: Learning Objectives
+            {
+                title: "What We'll Learn Today",
+                content: `
+                    <ul class="list-disc list-inside text-left text-2xl md:text-3xl space-y-6 text-gray-800 max-w-4xl">
+                        <li>Define and explain the core concept of <span class="font-bold text-blue-600">Student Diversity</span>.</li>
+                        <li>Identify the <span class="font-bold text-blue-600">key factors and benefits</span> of diversity in the classroom.</li>
+                        <li>Analyze the principles of <span class="font-bold text-blue-600">Balancing Diversity and Unity</span>.</li>
+                        <li>Analyze the importance of <span class="font-bold text-blue-600">Differentiated Instruction and Assessment</span>.</li>
+                        <li>Apply these principles to a scenario within the Philippine educational system.</li>
+                    </ul>
+                `,
+                notes: "By the end of our report, we aim for all of us to achieve these main objectives. First, we will establish a clear definition of Student Diversity. Second, we will identify the specific factors that create this diversity and the benefits it brings. Then, we will analyze two foundational principles for the classroom: finding a balance between what makes our students different and what makes them the same, and the necessity of adapting how we teach and grade. Finally, and most importantly, we will ground these theories in the reality of the Philippine classroom."
+            },
+            // Slide 4: Defining the Core Concept
+            {
+                title: "What is Student Diversity?",
+                content: `
+                    <div class="text-center w-full max-w-4xl">
+                        <blockquote class="bg-gray-50 p-8 rounded-xl border border-gray-200 mb-8">
+                            <p class="text-3xl italic text-gray-700">The module explains that in all learning environments, "individuals interact with others who are in some ways different from them." This diversity arises from the fact that "everyone is unique."</p>
+                        </blockquote>
+                        <p class="text-3xl text-gray-600">Think of a Filipino classroom as a <span class="font-bold text-purple-600">halo-halo</span>. Each unique ingredient contributes to the rich and complete learning experience of the entire class.</p>
+                    </div>
+                `,
+                notes: "So, what exactly is Student Diversity? The module tells us it stems from the simple fact that our classrooms are a mix of individuals who are different from one another. It’s based on the idea that 'everyone is unique.' This isn't just a cliché; it's a fundamental truth for educators. Think of a Filipino classroom as a halo-halo. Each ingredient—the ube, the leche flan, the sago, the beans—is distinct in its flavor and texture. It's the unique combination of all these different parts that makes halo-halo a beloved and complete dessert. In the same way, each student's unique background and style contribute to the rich and complete learning experience of the entire class. But where do these differences come from?"
+            },
+             // Slide 5: The Factors of Student Diversity
+            {
+                title: "Factors that Bring about Student Diversity",
+                content: `
+                    <div class="w-full max-w-4xl space-y-6 text-left">
+                        <div class="bg-green-50 border-l-8 border-green-500 p-6 rounded-r-lg">
+                            <h3 class="font-bold text-2xl text-green-800">1. Socioeconomic Status</h3>
+                            <p class="text-xl text-gray-700">Differences in lifestyle, resources, and experiences between students from lower, middle, and upper-income families.</p>
+                        </div>
+                        <div class="bg-yellow-50 border-l-8 border-yellow-500 p-6 rounded-r-lg">
+                            <h3 class="font-bold text-2xl text-yellow-800">2. Thinking / Learning Style</h3>
+                            <p class="text-xl text-gray-700">"Some of you learn better by seeing something; others by just listening; and still others by manipulating something."</p>
+                        </div>
+                        <div class="bg-red-50 border-l-8 border-red-500 p-6 rounded-r-lg">
+                            <h3 class="font-bold text-2xl text-red-800">3. Exceptionalities</h3>
+                            <p class="text-xl text-gray-700">This includes giftedness as well as physical or learning challenges, such as "difficulty in spoken language comprehension or in seeing, hearing, etc."</p>
+                        </div>
+                    </div>
+                `,
+                notes: "Our module gives us a clear framework for understanding where this diversity comes from. It highlights three key factors. First, Socioeconomic Status. A student whose parents are OFWs will have a different worldview and set of experiences compared to a student whose family depends on farming. Second, Thinking and Learning Styles. We all know this from experience—some of us need to see diagrams (visual), some need to hear the lecture clearly (auditory), and some need to actually do the experiment to understand it (kinesthetic). Finally, Exceptionalities. This is a broad category that includes students with disabilities, but also gifted students who may be under-challenged by standard lessons. Acknowledging these factors is the first step to addressing them effectively."
+            },
+            // Slide 6: NEW - The Benefits of Diversity
+            {
+                title: "Why Embrace Diversity? The Benefits",
+                content: `
+                    <div class="w-full max-w-4xl text-left space-y-4 text-2xl">
+                        <p><span class="font-bold text-blue-600">Enhances Self-Awareness:</span> Exposure to different perspectives sharpens students' own attitudes, values, and behaviors.</p>
+                        <p><span class="font-bold text-blue-600">Boosts Cognitive Development:</span> Diversity creates a "marketplace of ideas."</p>
+                        <blockquote class="border-l-4 border-gray-300 pl-6 italic text-gray-600 my-4">
+                            "The more eyes, different eyes, we can use to observe one thing, the more complete will our concept of this thing, our 'objectivity,' be." – Friedrich Nietzsche
+                        </blockquote>
+                        <p><span class="font-bold text-blue-600">Prepares for Responsible Citizenship:</span> It prepares learners for their roles in a diverse society.</p>
+                    </div>
+                `,
+                notes: "The module is clear that diversity isn't just something to manage; it's something that enriches the learning environment. It enhances students' self-awareness by giving them reference points to understand themselves better. It boosts cognitive development—as Nietzsche powerfully states, seeing a problem through multiple perspectives leads to a more objective, complete understanding. Finally, it prepares students for the real world, which is inherently diverse."
+            },
+            // Slide 7: Key Principle 1
+            {
+                title: "Principle 1: Balancing Diversity and Unity",
+                content: `
+                    <div class="w-full max-w-4xl text-left">
+                        <p class="text-2xl mb-6">A wise teacher identifies patterns of unity that transcend group differences. We must appreciate both our unique identities and our shared humanity.</p>
+                        <blockquote class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <p class="text-2xl italic text-gray-700">"...every human is, at the same time, like all other humans, like some other humans, and like no other human."</p>
+                            <p class="text-right font-semibold text-gray-600 mt-4 text-xl">- Clyde Kluckhohn, Anthropologist</p>
+                        </blockquote>
+                    </div>
+                `,
+                notes: "The first key principle is a delicate balancing act. We must celebrate differences, but as the module warns, focusing only on them can promote divisiveness. Therefore, we must also find common ground. The anthropologist Clyde Kluckhohn captured this perfectly. Every student is like all others in their basic humanity, like some others in their cultural or social groups, and like no other in their unique individuality. Our job is to address all three levels."
+            },
+            // Slide 8: Key Principle 2
+            {
+                title: "Principle 2: Differentiated Instruction & Assessment",
+                content: `
+                    <ul class="list-none text-left text-2xl space-y-6 w-full max-w-4xl">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 font-bold mr-4 text-3xl">✔</span>
+                            <span>Vary instructional methods (oral, print, hands-on) and formats (group work, lectures).</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 font-bold mr-4 text-3xl">✔</span>
+                            <span class="font-bold">Allow for student choice and decision-making in their tasks.</span>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-blue-500 font-bold mr-4 text-3xl">✔</span>
+                            <span>Diversify assessment methods beyond tests to include projects, presentations, and portfolios.</span>
+                        </li>
+                    </ul>
+                `,
+                notes: "The second key principle is about action. If we accept that students are diverse, then a one-size-fits-all approach won't work. The module emphasizes differentiation. This means varying not just how we teach, but also how we assess. Crucially, as Point 7 in the module states, it also means giving learners more choice and decision-making opportunities. This empowers them and allows them to take control of their learning, reducing anxiety and increasing motivation."
+            },
+            // Slide 9: Connecting to the Philippine Context
+            {
+                title: "Bringing It Home: The Philippine Classroom",
+                content: `
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-12 w-full">
+                         <img src="https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Filipino students in a classroom" class="w-64 h-64 md:w-80 md:h-80 rounded-lg object-cover shadow-lg">
+                         <div class="text-left">
+                            <p class="text-3xl font-bold text-gray-800 mb-4">How does Student Diversity align with DepEd's MATATAG Agenda?</p>
+                            <ul class="list-disc list-inside space-y-3 text-2xl">
+                                <li><span class="font-bold">MA</span>ke the curriculum relevant...</li>
+                                <li><span class="font-bold">TA</span>ke care of learners' well-being...</li>
+                                <li><span class="font-bold">TA</span>ke care of teachers...</li>
+                                <li><span class="font-bold">G</span>ive support for a 21st-century education...</li>
+                            </ul>
+                         </div>
+                    </div>
+                `,
+                notes: "This isn't just theory; it's directly relevant to the direction of Philippine education today. Let's consider the DepEd's MATATAG Agenda. A core component of this agenda is to 'Make the curriculum relevant.' How can we make it relevant if we don't acknowledge the diverse backgrounds, languages, and local contexts of our students from Batanes to Tawi-Tawi? Another component is to 'Take care of learners' well-being.' Creating an inclusive classroom where every student feels seen, heard, and respected is fundamental to their psychological and emotional safety. Embracing student diversity is not a separate, add-on strategy; it is a core requirement for achieving the goals of the MATATAG agenda."
+            },
+            // Slide 10: Case Study
+            {
+                title: "Case Study: Applying Theory in a Local School",
+                content: `
+                    <div class="w-full max-w-4xl text-left space-y-6">
+                        <div class="p-6 border-2 border-red-300 rounded-lg bg-red-50">
+                            <h3 class="font-bold text-2xl text-red-700">Challenge:</h3>
+                            <p class="text-xl">Ma'am Reyes, a high school teacher in Quezon City, notices that students from different provinces are hesitant to interact. There is cliquishness and a lack of classroom unity.</p>
+                        </div>
+                        <div class="p-6 border-2 border-yellow-400 rounded-lg bg-yellow-50">
+                            <h3 class="font-bold text-2xl text-yellow-700">Application (Principle 1):</h3>
+                            <p class="text-xl">She initiates a "Pista ng Ating Bayan" project. Groups present on festivals from their hometowns, then discuss common themes of community, thanksgiving, and celebration.</p>
+                        </div>
+                        <div class="p-6 border-2 border-green-400 rounded-lg bg-green-50">
+                            <h3 class="font-bold text-2xl text-green-700">Outcome:</h3>
+                            <p class="text-xl">Students develop pride in their local heritage while also recognizing their shared Filipino identity. Classroom interaction and collaboration improve significantly.</p>
+                        </div>
+                    </div>
+                `,
+                notes: "Let's make this even more concrete. Imagine Ma'am Reyes, a teacher in a public school right here in Quezon City. Her classroom is a melting pot, with students whose families come from Ilocos, Bicol, Cebu, and more. The challenge? They stick to their own kind. Applying the principle of balancing diversity and unity, she doesn't ignore their differences. Instead, she celebrates them through a 'Pista ng Ating Bayan' project. Students get to be experts on their own culture. But the masterstroke is the reflection that follows, where she guides them to see that the spirit of bayanihan and celebration is a thread that connects all their festivals. The outcome is a classroom that is not just tolerant of diversity, but one that is strengthened by it."
+            },
+            // Slide 11: Challenges & Opportunities
+            {
+                title: "The Reality: Challenges & Opportunities",
+                content: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl text-left">
+                        <div class="bg-red-100 p-6 rounded-lg">
+                            <h3 class="font-bold text-3xl text-red-800 mb-3">Challenges</h3>
+                            <ul class="list-disc list-inside space-y-3 text-2xl">
+                                <li>Large Class Sizes (40-50+ students)</li>
+                                <li>Limited Resources & Technology</li>
+                                <li>Pressure from Standardized Testing</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-100 p-6 rounded-lg">
+                            <h3 class="font-bold text-3xl text-green-800 mb-3">Opportunities</h3>
+                            <ul class="list-disc list-inside space-y-3 text-2xl">
+                                <li>The "Bayanihan" Spirit</li>
+                                <li>Rich Cultural Diversity</li>
+                                <li>Core Value of "Pakikipagkapwa-tao"</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                notes: "Of course, we must be realistic. Applying these principles in the Philippines has its own set of challenges. We all know about our large class sizes, which can make differentiation feel overwhelming. We know that many schools lack the funds for diverse learning materials. And the pressure of standardized tests can sometimes discourage creative, non-traditional teaching methods. However, we are also uniquely blessed with opportunities. The Filipino spirit of Bayanihan is the perfect foundation for collaborative learning. Our incredible cultural diversity is not a problem to be solved, but a library of content to draw from. And our core value of pakikipagkapwa-tao, or seeing ourselves in others, is exactly the mindset we want to foster to create a unified and empathetic classroom."
+            },
+            // Slide 12: Implications
+            {
+                title: "What This Means for Us",
+                content: `
+                    <div class="w-full text-center max-w-4xl">
+                        <p class="text-3xl mb-4">Embracing student diversity changes the teacher's role from a "source of all knowledge" to a...</p>
+                        <p class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-400 py-2">Facilitator of Learning</p>
+                        <div class="text-left mt-8 w-full space-y-3">
+                            <h4 class="font-bold text-2xl">Four Practical Tips from the Module:</h4>
+                            <p class="bg-gray-100 p-3 rounded-md text-xl">1. <span class="font-bold">Communicate High Expectations:</span> Use effective questioning to draw in students from all subgroups.</p>
+                            <p class="bg-gray-100 p-3 rounded-md text-xl">2. <span class="font-bold">Learn Their Names:</span> Build rapport by pronouncing names correctly.</p>
+                            <p class="bg-gray-100 p-3 rounded-md text-xl">3. <span class="font-bold">Vary Your Examples:</span> Use illustrations relevant to students' lives.</p>
+                            <p class="bg-gray-100 p-3 rounded-md text-xl">4. <span class="font-bold">Form Diverse Groups:</span> Intentionally mix students to foster multiple viewpoints.</p>
+                        </div>
+                    </div>
+                `,
+                notes: "So, what does all this mean for us, as future educators? It means we need to shift our perspective. We are not just there to deposit information into students' heads. We are there to facilitate a process of discovery. Our module gives us very concrete things we can start with. A new key point from the module is to always communicate high expectations for everyone—this avoids stereotypes. Then, learn their names, vary your examples to make lessons relevant, and be intentional about creating diverse groups."
+            },
+            // Slide 13: Summary
+            {
+                title: "Key Takeaways",
+                content: `
+                    <ol class="list-decimal list-inside text-left text-3xl space-y-8 w-full max-w-4xl">
+                        <li><span class="font-bold">Diversity is a Resource:</span> It stems from key factors and provides benefits like enhanced self-awareness and cognitive growth.</li>
+                        <li><span class="font-bold">Effective Teaching Balances Two Principles:</span> We must celebrate what makes students unique (diversity) while also building a sense of community (unity).</li>
+                        <li><span class="font-bold">Adaptation is Key:</span> As future Filipino teachers, we must be flexible and creative, differentiating our instruction and allowing student choice to meet the needs of every learner.</li>
+                    </ol>
+                `,
+                notes: "To summarize our report, we leave you with three key takeaways. First, student diversity is not a problem but a resource, stemming from clear factors and offering real benefits. Second, the most effective teachers master the art of balancing the celebration of individual differences with the cultivation of unity. And finally, the call for us as future educators is to be adaptive, connecting these principles to the realities of the Philippine classroom to ensure every single student can succeed."
+            },
+            // Slide 14: Group Discussion
+            {
+                title: "Let's Discuss!",
+                content: `
+                    <div class="w-full text-center max-w-5xl">
+                        <div class="bg-yellow-100 border-l-8 border-yellow-500 p-8 rounded-r-lg mb-8">
+                            <p class="font-bold text-2xl text-yellow-800">Discussion Question:</p>
+                            <p class="text-2xl text-gray-800 mt-2">Imagine a new student from a remote indigenous community in Mindanao joins your Grade 10 English class in Metro Manila. What is <span class="font-bold">one specific and practical strategy</span> you would use in the first week to apply the principles of diversity and inclusion?</p>
+                        </div>
+                        <div class="flex justify-around w-full mt-4">
+                            <div class="text-center p-4 bg-gray-100 rounded-lg shadow-lg">
+                                <p class="font-bold text-4xl text-blue-600">1 min</p>
+                                <p class="font-semibold text-2xl">Think</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-100 rounded-lg shadow-lg">
+                                <p class="font-bold text-4xl text-blue-600">2 mins</p>
+                                <p class="font-semibold text-2xl">Pair</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-100 rounded-lg shadow-lg">
+                                <p class="font-bold text-4xl text-blue-600">3 mins</p>
+                                <p class="font-semibold text-2xl">Share</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                notes: "Now we'd like to hear from you. We're going to do a quick 'Think-Pair-Share' activity. Please read the question on the slide. Imagine this scenario is real. What is one concrete strategy you would use? We'll give you one minute to think silently. [Wait one minute]. Okay, now please turn to the person next to you and discuss your ideas for two minutes. [Wait two minutes]. Alright, time's up! Who would like to share what their pair came up with?"
+            },
+            // Slide 15: Thank You
+            {
+                title: "Maraming Salamat!",
+                content: `
+                    <div class="text-center">
+                        <h2 class="text-8xl font-bold text-gray-800">Questions?</h2>
+                        <p class="mt-12 text-4xl text-gray-600">Group 1</p>
+                    </div>
+                `,
+                notes: "That brings us to the end of our report. Thank you all so much for your time and attention. Maraming salamat po! We are now ready to answer any questions you may have."
+            }
+        ];
+
+        let currentSlide = 0;
+        const slidesWrapper = document.getElementById('slides-wrapper'); // Corrected: Target the wrapper
+        const slideCounter = document.getElementById('slide-counter');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+
+        function renderSlides() {
+            slidesWrapper.innerHTML = ''; // Corrected: Clear only the wrapper
+            slides.forEach((slideData, index) => {
+                const slideElement = document.createElement('div');
+                slideElement.className = 'slide w-full h-full flex-col items-center justify-center p-8 md:p-16 text-center';
+                if (index === 0) slideElement.classList.add('active');
+
+                slideElement.innerHTML = `
+                    <div class="flex-grow w-full flex flex-col items-center justify-center">
+                        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 mb-8">${slideData.title}</h1>
+                        ${slideData.content || ''}
+                    </div>
+                    ${slideData.footer ? `<div class="w-full pt-4">${slideData.footer}</div>` : ''}
+                    <div class="speaker-notes absolute bottom-0 left-0 right-0 bg-gray-800 text-white p-4 text-left text-sm rounded-t-lg transform translate-y-full max-h-48 overflow-y-auto">
+                        <h4 class="font-bold mb-2">Speaker Notes:</h4>
+                        <p>${slideData.notes}</p>
+                    </div>
+                `;
+                slidesWrapper.appendChild(slideElement); // Corrected: Append to the wrapper
+            });
+        }
+
+        function showSlide(index) {
+            const allSlides = document.querySelectorAll('#slides-wrapper .slide'); // Corrected: More specific selector
+            allSlides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            currentSlide = index;
+            updateControls();
+        }
+
+        function updateControls() {
+            slideCounter.textContent = `Slide ${currentSlide + 1} of ${slides.length}`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function toggleNotes() {
+            const activeSlide = document.querySelector('.slide.active');
+            if (activeSlide) {
+                const notes = activeSlide.querySelector('.speaker-notes');
+                if (notes) {
+                    notes.style.display = notes.style.display === 'block' ? 'none' : 'block';
+                    notes.classList.toggle('translate-y-0');
+                    notes.classList.toggle('translate-y-full');
+                }
+            }
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        toggleNotesBtn.addEventListener('click', toggleNotes);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key.toLowerCase() === 'n') {
+                toggleNotes();
+            }
+        });
+
+        // Initial Load
+        renderSlides();
+        showSlide(0);
+
+    </script>
+
 </body>
 </html>
