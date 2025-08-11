@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Exam: Modules 3-7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn.active {
+            border-color: #3B82F6;
+            color: #3B82F6;
+            background-color: #EFF6FF;
+        }
+        .correct-answer {
+            display: none;
+            color: #16A34A; /* Green */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">Comprehensive Exam</h1>
+            <p class="text-lg text-gray-600 mt-2">Facilitating Learner-Centered Teaching: Modules 3-7</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div id="tab-nav" class="mb-6 flex flex-wrap border-b border-gray-300">
+            <button class="tab-btn flex-grow md:flex-initial text-center py-3 px-4 font-semibold text-gray-600 border-b-4 border-transparent hover:bg-gray-200 transition-colors active" data-tab="module3">Module 3: Dev. Theories</button>
+            <button class="tab-btn flex-grow md:flex-initial text-center py-3 px-4 font-semibold text-gray-600 border-b-4 border-transparent hover:bg-gray-200 transition-colors" data-tab="module4">Module 4: Diversity</button>
+            <button class="tab-btn flex-grow md:flex-initial text-center py-3 px-4 font-semibold text-gray-600 border-b-4 border-transparent hover:bg-gray-200 transition-colors" data-tab="module5">Module 5: Styles & MI</button>
+            <button class="tab-btn flex-grow md:flex-initial text-center py-3 px-4 font-semibold text-gray-600 border-b-4 border-transparent hover:bg-gray-200 transition-colors" data-tab="module6">Module 6: Exceptionalities</button>
+            <button class="tab-btn flex-grow md:flex-initial text-center py-3 px-4 font-semibold text-gray-600 border-b-4 border-transparent hover:bg-gray-200 transition-colors" data-tab="module7">Module 7: Behaviorism</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content-wrapper" class="bg-white p-6 rounded-lg shadow-md">
+            
+            <!-- Module 3 Content -->
+            <div id="module3" class="tab-content active">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Module 3: Review of Developmental Theories</h2>
+                <div class="space-y-8">
+                    <!-- Question 1 -->
+                    <div>
+                        <p class="font-semibold text-lg">1. A Grade 3 student in a Bicol school is learning to weave a simple abaca pattern. She can't do it alone, but she succeeds with her grandmother guiding her hands. According to Vygotsky, this task is in the student's:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Zone of Achieved Development (ZAD)</p>
+                            <p>B. Zone of Proximal Development (ZPD)</p>
+                            <p>C. Microsystem</p>
+                            <p>D. Scaffolding Zone</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Zone of Proximal Development (ZPD)</p>
+                    </div>
+                     <!-- Question 2 -->
+                    <div>
+                        <p class="font-semibold text-lg">2. During a group project, a teacher assigns a student who is skilled in video editing to teach his groupmates the basics. In this scenario, the skilled student is acting as the:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Scaffolder</p>
+                            <p>B. Formal Operator</p>
+                            <p>C. More Knowledgeable Other (MKO)</p>
+                            <p>D. Zone of Proximal Development</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. More Knowledgeable Other (MKO)</p>
+                    </div>
+                    <!-- Question 3 -->
+                    <div>
+                        <p class="font-semibold text-lg">3. A toddler at a Jollibee party sees a slice of cake and immediately tries to grab it, crying loudly when his mother stops him. According to Freud, this immediate demand for gratification is driven by the:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Ego</p>
+                            <p>B. Superego</p>
+                            <p>C. Conscience</p>
+                            <p>D. Id</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="D">Answer: D. Id</p>
+                    </div>
+                    <!-- Question 4 -->
+                    <div>
+                        <p class="font-semibold text-lg">4. A 5-year-old playing *taguan* (hide-and-seek) covers her own eyes and believes that because she can't see her playmates, they can't see her either. This is a classic example of what Piagetian concept?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Conservation</p>
+                            <p>B. Object Permanence</p>
+                            <p>C. Egocentrism</p>
+                            <p>D. Formal Operational Thought</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Egocentrism</p>
+                    </div>
+                    <!-- Question 5 -->
+                    <div>
+                        <p class="font-semibold text-lg">5. A student decides not to copy his seatmate's answers on a quiz, not because he understands the school's honor code, but simply because he is afraid the teacher will catch him and give him a failing grade. This reasoning is characteristic of which of Kohlberg's levels?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Pre-conventional Level</p>
+                            <p>B. Conventional Level</p>
+                            <p>C. Post-conventional Level</p>
+                            <p>D. Universal Principles Level</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="A">Answer: A. Pre-conventional Level</p>
+                    </div>
+                    <!-- Question 6 -->
+                    <div>
+                        <p class="font-semibold text-lg">6. A child's development is strongly influenced by her daily interactions with her family, her teachers at her local daycare, and her friends at the barangay playground. According to Bronfenbrenner, these immediate settings are all part of the child's:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Mesosystem</p>
+                            <p>B. Exosystem</p>
+                            <p>C. Macrosystem</p>
+                            <p>D. Microsystem</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="D">Answer: D. Microsystem</p>
+                    </div>
+                    <!-- Question 7 -->
+                    <div>
+                        <p class="font-semibold text-lg">7. An infant whose *yaya* (nanny) consistently responds to her cries, feeds her on time, and provides comfort is likely to successfully resolve which of Erikson's psychosocial crises?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Autonomy vs. Shame/Doubt</p>
+                            <p>B. Initiative vs. Guilt</p>
+                            <p>C. Trust vs. Mistrust</p>
+                            <p>D. Industry vs. Inferiority</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Trust vs. Mistrust</p>
+                    </div>
+                    <!-- Question 8 -->
+                    <div>
+                        <p class="font-semibold text-lg">8. A high school student in Manila is trying to figure out who she is by joining different clubs, changing her fashion style, and exploring various hobbies. Erikson would describe this stage as:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Intimacy vs. Isolation</p>
+                            <p>B. Identity vs. Role Confusion</p>
+                            <p>C. Generativity vs. Stagnation</p>
+                            <p>D. Ego Integrity vs. Despair</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Identity vs. Role Confusion</p>
+                    </div>
+                    <!-- Question 9 -->
+                    <div>
+                        <p class="font-semibold text-lg">9. A teacher notices that her student's performance in school has declined. She later learns that the student's father lost his job at a factory in Laguna, causing stress at home. In Bronfenbrenner's model, the father's workplace is part of the child's:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Microsystem</p>
+                            <p>B. Mesosystem</p>
+                            <p>C. Exosystem</p>
+                            <p>D. Macrosystem</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Exosystem</p>
+                    </div>
+                    <!-- Question 10 -->
+                    <div>
+                        <p class="font-semibold text-lg">10. A Grade 6 student understands that if you flatten a ball of clay, it's still the same amount of clay. This student is demonstrating the Piagetian principle of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Object Permanence</p>
+                            <p>B. Symbolic Thought</p>
+                            <p>C. Conservation</p>
+                            <p>D. Abstract Reasoning</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Conservation</p>
+                    </div>
+                </div>
+                <button class="show-answers-btn mt-8 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors" data-module="module3">Show Answers</button>
+            </div>
+
+            <!-- Module 4 Content -->
+            <div id="module4" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Module 4: Student Diversity</h2>
+                <div class="space-y-8">
+                    <!-- Question 1 -->
+                    <div>
+                        <p class="font-semibold text-lg">1. A teacher in a Quezon City high school has students from various provinces. To foster unity, she creates a project where groups present on their local festivals but then facilitates a discussion on the common themes of community and thanksgiving. This strategy primarily aims to:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Emphasize the differences between students to promote individuality.</p>
+                            <p>B. Balance the celebration of diversity with the identification of unifying human experiences.</p>
+                            <p>C. Suggest that one local culture is more vibrant than others.</p>
+                            <p>D. Discourage students from sharing their personal backgrounds.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Balance the celebration of diversity with the identification of unifying human experiences.</p>
+                    </div>
+                     <!-- Question 2 -->
+                    <div>
+                        <p class="font-semibold text-lg">2. A teacher in a public school in Makati notices that some students have the latest gadgets while others struggle with basic school supplies. This is an example of which factor of student diversity?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Learning style.</p>
+                            <p>B. Exceptionalities.</p>
+                            <p>C. Socioeconomic status.</p>
+                            <p>D. Ethnic background.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Socioeconomic status.</p>
+                    </div>
+                    <!-- Question 3 -->
+                    <div>
+                        <p class="font-semibold text-lg">3. To make a lesson on Philippine heroes more inclusive, a teacher includes figures from Mindanao and the Visayas, not just Luzon. This practice directly addresses the need to:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Focus only on the most famous historical figures.</p>
+                            <p>B. Vary examples to reflect students' diverse backgrounds.</p>
+                            <p>C. Assume all students share the same historical knowledge.</p>
+                            <p>D. Prioritize a single narrative in history.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Vary examples to reflect students' diverse backgrounds.</p>
+                    </div>
+                    <!-- Question 4 -->
+                    <div>
+                        <p class="font-semibold text-lg">4. A teacher purposely forms project groups with a mix of students: some who are quiet, some who are talkative, some who are artistic, and some who are organized. The primary benefit of this approach is:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. It ensures that the most talkative students do all the work.</p>
+                            <p>B. It makes classroom management more difficult for the teacher.</p>
+                            <p>C. It exposes students to different perspectives and working styles, enhancing cognitive development.</p>
+                            <p>D. It proves that students work best with people who are exactly like them.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. It exposes students to different perspectives and working styles, enhancing cognitive development.</p>
+                    </div>
+                    <!-- Question 5 -->
+                    <div>
+                        <p class="font-semibold text-lg">5. During a class discussion, a student shares a religious belief that is different from the majority of the class. What is the most appropriate action for the teacher?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Tell the student that their belief is incorrect.</p>
+                            <p>B. Quickly change the topic to avoid disagreement.</p>
+                            <p>C. Facilitate a respectful discussion, treating the student's perspective as a valid part of diversity.</p>
+                            <p>D. Ask the student not to share religious beliefs in class.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Facilitate a respectful discussion, treating the student's perspective as a valid part of diversity.</p>
+                    </div>
+                    <!-- Question 6 -->
+                    <div>
+                        <p class="font-semibold text-lg">6. A teacher allows students to demonstrate their understanding of a novel through various means: a written report, a dramatic monologue, or a comic strip. This approach primarily caters to diversity in:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Socioeconomic status.</p>
+                            <p>B. Age and gender.</p>
+                            <p>C. Learning styles and exceptionalities.</p>
+                            <p>D. Geographic origin.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Learning styles and exceptionalities.</p>
+                    </div>
+                    <!-- Question 7 -->
+                    <div>
+                        <p class="font-semibold text-lg">7. The Filipino cultural value of "pakikipagkapwa-tao" (shared identity and empathy) can be a powerful tool in a diverse classroom because it:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Encourages students to form exclusive groups.</p>
+                            <p>B. Promotes a sense of shared humanity and understanding despite differences.</p>
+                            <p>C. Focuses only on the needs of the individual, not the group.</p>
+                            <p>D. Is only applicable in a homogenous, non-diverse setting.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Promotes a sense of shared humanity and understanding despite differences.</p>
+                    </div>
+                    <!-- Question 8 -->
+                    <div>
+                        <p class="font-semibold text-lg">8. A teacher makes a consistent effort to learn how to pronounce the unique names of all her students correctly. This small but important action primarily shows:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. That the teacher has a good memory.</p>
+                            <p>B. Respect for the students' individual and cultural identities.</p>
+                            <p>C. That the teacher favors students with unusual names.</p>
+                            <p>D. That names are not an important part of a student's identity.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Respect for the students' individual and cultural identities.</p>
+                    </div>
+                    <!-- Question 9 -->
+                    <div>
+                        <p class="font-semibold text-lg">9. A challenge to implementing differentiated instruction in many Philippine public schools is the large class size. An effective strategy to manage this is to:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Give up on differentiation and use a one-size-fits-all approach.</p>
+                            <p>B. Focus only on the fast learners and let the others catch up.</p>
+                            <p>C. Use flexible grouping strategies, where students can work in pairs, small groups, or individually.</p>
+                            <p>D. Send all struggling students to a separate remedial class.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Use flexible grouping strategies, where students can work in pairs, small groups, or individually.</p>
+                    </div>
+                    <!-- Question 10 -->
+                    <div>
+                        <p class="font-semibold text-lg">10. A teacher notices that students whose parents are OFWs have different perspectives on family compared to students whose parents work locally. In a class discussion, the teacher should:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Avoid the topic of family to prevent discomfort.</p>
+                            <p>B. Conclude that one family structure is better than the other.</p>
+                            <p>C. Use this as an opportunity to discuss different family dynamics as a valid aspect of diversity.</p>
+                            <p>D. Only allow students from "traditional" families to share their experiences.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Use this as an opportunity to discuss different family dynamics as a valid aspect of diversity.</p>
+                    </div>
+                </div>
+                <button class="show-answers-btn mt-8 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors" data-module="module4">Show Answers</button>
+            </div>
+
+            <!-- Module 5 Content -->
+            <div id="module5" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Module 5: Learning Styles & Multiple Intelligences</h2>
+                 <div class="space-y-8">
+                    <!-- Question 1 -->
+                    <div>
+                        <p class="font-semibold text-lg">1. When teaching a new dance step for a Linggo ng Wika presentation, Teacher Ana first demonstrates the whole sequence, then breaks it down. This approach caters primarily to which type of learners?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Analytic learners who need to see the details first.</p>
+                            <p>B. Global learners who need to see the "big picture" before the parts.</p>
+                            <p>C. Auditory-symbolic learners who prefer written instructions.</p>
+                            <p>D. Visual-iconic learners who only need to see the final pose.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Global learners who need to see the "big picture" before the parts.</p>
+                    </div>
+                    <!-- Question 2 -->
+                    <div>
+                        <p class="font-semibold text-lg">2. A student in a Tarlac high school prefers to study with background music and often fidgets or walks around while memorizing. According to the brain hemisphere theory, these are characteristics of a:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Left-brain dominant (Analytic) learner.</p>
+                            <p>B. Right-brain dominant (Global) learner.</p>
+                            <p>C. Visual-symbolic learner.</p>
+                            <p>D. Auditory-listener learner.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Right-brain dominant (Global) learner.</p>
+                    </div>
+                    <!-- Question 3 -->
+                    <div>
+                        <p class="font-semibold text-lg">3. A teacher notices that one student excels at group work, easily understanding others' feelings and motivations, making her a natural leader. According to Howard Gardner, this student shows a high level of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Intrapersonal intelligence.</p>
+                            <p>B. Naturalist intelligence.</p>
+                            <p>C. Interpersonal intelligence.</p>
+                            <p>D. Bodily-kinesthetic intelligence.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Interpersonal intelligence.</p>
+                    </div>
+                    <!-- Question 4 -->
+                    <div>
+                        <p class="font-semibold text-lg">4. A student learns the parts of a plant best by actually touching the leaves, stem, and roots, and planting a seed themselves. This indicates a preference for which sensory learning style?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Visual-iconic.</p>
+                            <p>B. Auditory.</p>
+                            <p>C. Visual-symbolic.</p>
+                            <p>D. Tactile/Kinesthetic.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="D">Answer: D. Tactile/Kinesthetic.</p>
+                    </div>
+                    <!-- Question 5 -->
+                    <div>
+                        <p class="font-semibold text-lg">5. A teacher explains a mathematical formula on the board. One student understands it best by reading the formula (the symbols), while another understands it best by looking at a chart that shows how the formula is used. This illustrates the difference between:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Analytic and Global learners.</p>
+                            <p>B. Auditory listeners and Auditory talkers.</p>
+                            <p>C. Visual-symbolic and Visual-iconic learners.</p>
+                            <p>D. Interpersonal and Intrapersonal intelligence.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Visual-symbolic and Visual-iconic learners.</p>
+                    </div>
+                    <!-- Question 6 -->
+                    <div>
+                        <p class="font-semibold text-lg">6. A student from a family of musicians in Manila easily picks up rhythms and patterns in poetry and even in mathematical sequences. This student likely has a strong:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Bodily-kinesthetic intelligence.</p>
+                            <p>B. Musical intelligence.</p>
+                            <p>C. Naturalist intelligence.</p>
+                            <p>D. Spatial intelligence.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Musical intelligence.</p>
+                    </div>
+                    <!-- Question 7 -->
+                    <div>
+                        <p class="font-semibold text-lg">7. An analytic, left-brain dominant learner would most likely prefer which of the following activities when studying for an exam?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Creating a mind map with colorful drawings.</p>
+                            <p>B. Discussing the topics with a study group.</p>
+                            <p>C. Creating a detailed, sequential outline of the topics.</p>
+                            <p>D. Walking around the room while reading their notes aloud.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Creating a detailed, sequential outline of the topics.</p>
+                    </div>
+                    <!-- Question 8 -->
+                    <div>
+                        <p class="font-semibold text-lg">8. A student is highly self-aware, understands their own strengths and weaknesses, and prefers to work alone on projects that allow for self-reflection. This is a hallmark of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Interpersonal intelligence.</p>
+                            <p>B. Intrapersonal intelligence.</p>
+                            <p>C. Existential intelligence.</p>
+                            <p>D. Verbal-linguistic intelligence.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Intrapersonal intelligence.</p>
+                    </div>
+                    <!-- Question 9 -->
+                    <div>
+                        <p class="font-semibold text-lg">9. A teacher in Palawan notices a student is exceptionally good at identifying different types of local plants and animals and understanding their roles in the ecosystem. This student demonstrates a high level of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Spatial intelligence.</p>
+                            <p>B. Bodily-kinesthetic intelligence.</p>
+                            <p>C. Naturalist intelligence.</p>
+                            <p>D. Logical-mathematical intelligence.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Naturalist intelligence.</p>
+                    </div>
+                    <!-- Question 10 -->
+                    <div>
+                        <p class="font-semibold text-lg">10. A history teacher in Iloilo wants to teach about the Cry of Pugad Lawin. He offers students the choice to either write a reflective essay, create a diorama of the event, compose a song, or participate in a class debate. This assessment strategy is an excellent example of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. A standardized testing method.</p>
+                            <p>B. Focusing only on verbal-linguistic intelligence.</p>
+                            <p>C. Differentiating assessment to cater to Multiple Intelligences.</p>
+                            <p>D. A summative assessment with a single correct output.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Differentiating assessment to cater to Multiple Intelligences.</p>
+                    </div>
+                </div>
+                <button class="show-answers-btn mt-8 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors" data-module="module5">Show Answers</button>
+            </div>
+
+            <!-- Module 6 Content -->
+            <div id="module6" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Module 6: Learners with Exceptionalities</h2>
+                 <div class="space-y-8">
+                    <!-- Question 1 -->
+                    <div>
+                        <p class="font-semibold text-lg">1. The new school building in a Taguig elementary school does not have ramps, only stairs. For a student who uses a wheelchair, the flight of stairs represents a:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Disability, because it is a physical object.</p>
+                            <p>B. Handicap, because it is an environmental barrier that creates a disadvantage.</p>
+                            <p>C. Learning disability, because it affects their ability to get to class.</p>
+                            <p>D. An impairment that the student must overcome on their own.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Handicap, because it is an environmental barrier that creates a disadvantage.</p>
+                    </div>
+                    <!-- Question 2 -->
+                    <div>
+                        <p class="font-semibold text-lg">2. A student has difficulty reading and writing despite having average intelligence and no sensory impairments. This student may have a specific:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Physical disability.</p>
+                            <p>B. Emotional disorder.</p>
+                            <p>C. Learning disability.</p>
+                            <p>D. Speech impairment.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Learning disability.</p>
+                    </div>
+                    <!-- Question 3 -->
+                    <div>
+                        <p class="font-semibold text-lg">3. A teacher in a public school in Pasig is preparing her classroom for a student with a visual impairment. Which of the following is the LEAST helpful accommodation?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Providing audio recordings of the lessons.</p>
+                            <p>B. Using large-print worksheets.</p>
+                            <p>C. Ensuring the classroom is free of clutter and obstacles.</p>
+                            <p>D. Speaking more slowly and loudly to the student.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="D">Answer: D. Speaking more slowly and loudly to the student.</p>
+                    </div>
+                    <!-- Question 4 -->
+                    <div>
+                        <p class="font-semibold text-lg">4. A Grade 3 student is exceptionally advanced in mathematics, often finishing his work far ahead of his peers and showing a deep understanding of complex concepts. This student can be categorized as:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Having a learning disability in other subjects.</p>
+                            <p>B. Gifted and talented.</p>
+                            <p>C. Having ADHD.</p>
+                            <p>D. A student with a behavioral disorder.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Gifted and talented.</p>
+                    </div>
+                    <!-- Question 5 -->
+                    <div>
+                        <p class="font-semibold text-lg">5. Which of the following statements is an example of NOT using People-First Language?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. "The student with a hearing impairment will sit in the front."</p>
+                            <p>B. "We need to provide support for children with disabilities."</p>
+                            <p>C. "The disabled boy in my class needs an assistant."</p>
+                            <p>D. "He is a person who has epilepsy."</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. "The disabled boy in my class needs an assistant."</p>
+                    </div>
+                    <!-- Question 6 -->
+                    <div>
+                        <p class="font-semibold text-lg">6. A student with Autism Spectrum Disorder thrives in a classroom that is predictable and has clear routines. A sudden change in the class schedule without warning is likely to cause the student:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Happiness and excitement.</p>
+                            <p>B. A desire to lead the new activity.</p>
+                            <p>C. Anxiety and distress.</p>
+                            <p>D. No reaction at all.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Anxiety and distress.</p>
+                    </div>
+                    <!-- Question 7 -->
+                    <div>
+                        <p class="font-semibold text-lg">7. A student who has difficulty focusing, is constantly in motion, and often blurts out answers in class may be showing signs of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. A hearing impairment.</p>
+                            <p>B. Giftedness.</p>
+                            <p>C. A learning disability.</p>
+                            <p>D. Attention-Deficit/Hyperactivity Disorder (ADHD).</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="D">Answer: D. Attention-Deficit/Hyperactivity Disorder (ADHD).</p>
+                    </div>
+                    <!-- Question 8 -->
+                    <div>
+                        <p class="font-semibold text-lg">8. The 1987 Philippine Constitution provides for the education of citizens with disabilities. This reflects a societal commitment to:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Segregating students with disabilities from mainstream schools.</p>
+                            <p>B. Providing charity for a disadvantaged group.</p>
+                            <p>C. Upholding the right to education for all citizens.</p>
+                            <p>D. Limiting educational opportunities to those without disabilities.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Upholding the right to education for all citizens.</p>
+                    </div>
+                    <!-- Question 9 -->
+                    <div>
+                        <p class="font-semibold text-lg">9. A student has a severe speech impairment, making it difficult for him to communicate verbally. An effective teaching strategy would be to:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Avoid calling on him in class to prevent embarrassment.</p>
+                            <p>B. Insist that he speaks in complete sentences like everyone else.</p>
+                            <p>C. Work with him to use an alternative communication method, like a tablet or picture board.</p>
+                            <p>D. Assume he does not understand the lesson because he cannot speak clearly.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Work with him to use an alternative communication method, like a tablet or picture board.</p>
+                    </div>
+                    <!-- Question 10 -->
+                    <div>
+                        <p class="font-semibold text-lg">10. A teacher is describing a new student to her colleagues. Which of the following statements best demonstrates the use of People-First Language?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. "My new student is an autistic."</p>
+                            <p>B. "I have a student who has autism spectrum disorder."</p>
+                            <p>C. "The autistic boy in my class is very quiet."</p>
+                            <p>D. "She's one of my special needs kids."</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. "I have a student who has autism spectrum disorder."</p>
+                    </div>
+                </div>
+                <button class="show-answers-btn mt-8 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors" data-module="module6">Show Answers</button>
+            </div>
+
+            <!-- Module 7 Content -->
+            <div id="module7" class="tab-content">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Module 7: Behaviorism</h2>
+                 <div class="space-y-8">
+                    <!-- Question 1 -->
+                    <div>
+                        <p class="font-semibold text-lg">1. Every time the ice cream truck's bell rings down a street in Sampaloc, a young child feels excited and asks for money. The bell, which was once a neutral sound, now elicits excitement. This is a real-world example of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Operant conditioning, because the child operates on the environment.</p>
+                            <p>B. Classical conditioning, where a neutral stimulus is paired with an unconditioned stimulus.</p>
+                            <p>C. Thorndike's Law of Effect, because the consequence is positive.</p>
+                            <p>D. Skinner's theory of shaping behavior.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Classical conditioning, where a neutral stimulus is paired with an unconditioned stimulus.</p>
+                    </div>
+                    <!-- Question 2 -->
+                    <div>
+                        <p class="font-semibold text-lg">2. A teacher wants to help a very shy student participate more in class. She starts by praising the student for just looking up, then for raising her hand, and eventually for speaking. This technique of reinforcing successive approximations of a target behavior is called:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Shaping.</p>
+                            <p>B. Extinction.</p>
+                            <p>C. Stimulus generalization.</p>
+                            <p>D. Classical conditioning.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="A">Answer: A. Shaping.</p>
+                    </div>
+                    <!-- Question 3 -->
+                    <div>
+                        <p class="font-semibold text-lg">3. A student cleans his part of the classroom to avoid being scolded by the teacher. The removal of the unpleasant stimulus (the scolding) strengthens the cleaning behavior. This is an example of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Positive reinforcement.</p>
+                            <p>B. Negative reinforcement.</p>
+                            <p>C. Punishment.</p>
+                            <p>D. Extinction.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Negative reinforcement.</p>
+                    </div>
+                    <!-- Question 4 -->
+                    <div>
+                        <p class="font-semibold text-lg">4. A student who was bitten by a large Aspin dog in his barangay now feels fear when he sees any large dog, not just Aspins. This is an example of:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Stimulus discrimination.</p>
+                            <p>B. Stimulus generalization.</p>
+                            <p>C. Spontaneous recovery.</p>
+                            <p>D. Higher-order conditioning.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. Stimulus generalization.</p>
+                    </div>
+                    <!-- Question 5 -->
+                    <div>
+                        <p class="font-semibold text-lg">5. According to Thorndike's Law of Effect, a student will be more likely to repeat a behavior, such as studying for a test, if it is followed by:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. A difficult and confusing lecture.</p>
+                            <p>B. A pleasant or satisfying consequence, like a good grade.</p>
+                            <p>C. A neutral consequence that has no effect.</p>
+                            <p>D. An annoying consequence, like more homework.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="B">Answer: B. A pleasant or satisfying consequence, like a good grade.</p>
+                    </div>
+                    <!-- Question 6 -->
+                    <div>
+                        <p class="font-semibold text-lg">6. A teacher stops giving stickers for perfect attendance. Over time, students' perfect attendance rates begin to drop. This process is known as:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Shaping.</p>
+                            <p>B. Generalization.</p>
+                            <p>C. Extinction.</p>
+                            <p>D. Reinforcement.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Extinction.</p>
+                    </div>
+                    <!-- Question 7 -->
+                    <div>
+                        <p class="font-semibold text-lg">7. A student is not allowed to join his friends for recess because he did not finish his seatwork. The teacher is using which operant conditioning principle?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Positive reinforcement.</p>
+                            <p>B. Negative reinforcement.</p>
+                            <p>C. Punishment.</p>
+                            <p>D. The Law of Readiness.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Punishment.</p>
+                    </div>
+                    <!-- Question 8 -->
+                    <div>
+                        <p class="font-semibold text-lg">8. A teacher wants to start a new lesson on fractions, but she notices the students are tired and restless from their previous PE class. According to Thorndike's Law of Readiness, what should she do?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Proceed with the lesson as planned to stick to the schedule.</p>
+                            <p>B. Scold the students for not being ready to learn.</p>
+                            <p>C. Do a short, calming activity first to help the students become ready to learn.</p>
+                            <p>D. Give them a surprise quiz on fractions immediately.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Do a short, calming activity first to help the students become ready to learn.</p>
+                    </div>
+                    <!-- Question 9 -->
+                    <div>
+                        <p class="font-semibold text-lg">9. The key difference between classical and operant conditioning is that:</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Classical conditioning involves voluntary behaviors, while operant conditioning involves involuntary reflexes.</p>
+                            <p>B. Classical conditioning was developed by Skinner, and operant conditioning was developed by Pavlov.</p>
+                            <p>C. Classical conditioning associates two stimuli, while operant conditioning associates a behavior with a consequence.</p>
+                            <p>D. There is no significant difference between the two.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Classical conditioning associates two stimuli, while operant conditioning associates a behavior with a consequence.</p>
+                    </div>
+                    <!-- Question 10 -->
+                    <div>
+                        <p class="font-semibold text-lg">10. A teacher wants to encourage her Grade 2 students to read more books. She tells them that for every 5 books they finish, they get a sticker. This reward system is based on which schedule of reinforcement?</p>
+                        <div class="mt-2 space-y-1 text-gray-700">
+                            <p>A. Fixed-Interval, because the time is set.</p>
+                            <p>B. Variable-Interval, because the time is unpredictable.</p>
+                            <p>C. Fixed-Ratio, because reinforcement is given after a specific number of responses.</p>
+                            <p>D. Variable-Ratio, because the number of books is unpredictable.</p>
+                        </div>
+                        <p class="correct-answer mt-2" data-answer="C">Answer: C. Fixed-Ratio, because reinforcement is given after a specific number of responses.</p>
+                    </div>
+                </div>
+                <button class="show-answers-btn mt-8 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors" data-module="module7">Show Answers</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const showAnswerButtons = document.querySelectorAll('.show-answers-btn');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                tabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        showAnswerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const module = button.getAttribute('data-module');
+                const answers = document.querySelectorAll(`#${module} .correct-answer`);
+                answers.forEach(answer => {
+                    answer.style.display = 'block';
+                });
+                button.style.display = 'none'; // Hide button after clicking
+            });
+        });
+    </script>
+
+</body>
+</html>
