@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Ancients</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: none; /* Prevents scrolling on mobile when dragging */
+        }
+        .hero-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .hero-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .hero-card.selected {
+            border-color: #3b82f6;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        .action-icon.dragging {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+        .target-box.drag-over {
+            background-color: rgba(59, 130, 246, 0.3);
+            border-style: dashed;
+        }
+        .health-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+        .mana-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-7xl mx-auto">
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="text-center">
+            <h1 class="text-4xl font-bold mb-4">Project Ancients</h1>
+            <p class="text-xl text-gray-400">Loading hero data from the archives...</p>
+        </div>
+
+        <!-- Hero Selection Screen -->
+        <div id="hero-selection-screen" class="hidden">
+            <h1 class="text-3xl font-bold text-center mb-2">Assemble Your Team</h1>
+            <p class="text-center text-gray-400 mb-6">Select three heroes to command in battle.</p>
+            <div id="hero-roster" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Hero cards will be injected here -->
+            </div>
+            <div class="text-center mt-8">
+                <button id="start-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-xl disabled:bg-gray-500 disabled:cursor-not-allowed">
+                    Start Battle (<span id="selected-count">0</span>/3)
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden w-full">
+            <div class="text-center mb-4">
+                 <h2 id="turn-indicator" class="text-2xl font-bold">Turn 1: Planning Phase</h2>
+                 <p id="phase-instructions" class="text-gray-400">Drag actions onto enemy heroes to set your commands.</p>
+            </div>
+            <div class="flex justify-between items-start gap-8">
+                <!-- Player Team -->
+                <div id="player-team-container" class="w-1/2 space-y-4"></div>
+                <!-- Enemy Team -->
+                <div id="enemy-team-container" class="w-1/2 space-y-4"></div>
+            </div>
+             <div class="text-center mt-6">
+                <button id="commit-turn-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-xl">
+                    Commit Commands
+                </button>
+            </div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="hidden text-center">
+            <h1 id="end-title" class="text-5xl font-bold mb-4"></h1>
+            <p id="end-message" class="text-xl mb-8"></p>
+            <button id="play-again-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-xl">
+                Play Again
+            </button>
+        </div>
+
+    </div>
+
+    <script type="module">
+        // --- CONFIGURATION ---
+        const HERO_DATA_PATH = './heroes.csv'; 
+
+        // --- GAME STATE ---
+        let gameState = {
+            allHeroes: [],
+            playerTeam: [],
+            enemyTeam: [],
+            turn: 1,
+            phase: 'hero-selection', // hero-selection, planning, combat, end
+            commandQueue: [],
+            selectedHeroes: new Set(),
+        };
+
+        // --- DOM ELEMENTS ---
+        const DOMElements = {
+            loadingScreen: document.getElementById('loading-screen'),
+            heroSelectionScreen: document.getElementById('hero-selection-screen'),
+            gameScreen: document.getElementById('game-screen'),
+            endScreen: document.getElementById('end-screen'),
+            heroRoster: document.getElementById('hero-roster'),
+            selectedCount: document.getElementById('selected-count'),
+            startGameBtn: document.getElementById('start-game-btn'),
+            playerTeamContainer: document.getElementById('player-team-container'),
+            enemyTeamContainer: document.getElementById('enemy-team-container'),
+            commitTurnBtn: document.getElementById('commit-turn-btn'),
+            turnIndicator: document.getElementById('turn-indicator'),
+            phaseInstructions: document.getElementById('phase-instructions'),
+            endTitle: document.getElementById('end-title'),
+            endMessage: document.getElementById('end-message'),
+            playAgainBtn: document.getElementById('play-again-btn'),
+        };
+
+        // --- UTILITY FUNCTIONS ---
+        const csvToArray = (csv) => {
+            const rows = csv.slice(csv.indexOf('\n') + 1).split('\n');
+            const headers = csv.slice(0, csv.indexOf('\n')).split(',');
+            return rows.map(row => {
+                const values = row.split(',');
+                return headers.reduce((obj, header, i) => {
+                    obj[header.trim()] = values[i] ? values[i].trim() : '';
+                    return obj;
+                }, {});
+            });
+        };
+        
+        const showScreen = (screen) => {
+            DOMElements.loadingScreen.classList.add('hidden');
+            DOMElements.heroSelectionScreen.classList.add('hidden');
+            DOMElements.gameScreen.classList.add('hidden');
+            DOMElements.endScreen.classList.add('hidden');
+            screen.classList.remove('hidden');
+        };
+
+        // --- RENDER FUNCTIONS ---
+        const renderHeroSelection = () => {
+            DOMElements.heroRoster.innerHTML = '';
+            gameState.allHeroes.forEach(hero => {
+                const card = document.createElement('div');
+                card.className = 'hero-card bg-gray-700 p-4 rounded-lg border-2 border-transparent cursor-pointer';
+                card.dataset.heroName = hero.heroName;
+                card.innerHTML = `
+                    <div class="w-full h-24 bg-gray-600 rounded mb-2 flex items-center justify-center">
+                        <span class="text-gray-400">ICON</span>
+                    </div>
+                    <h3 class="font-bold text-center">${hero.heroName}</h3>
+                `;
+                card.addEventListener('click', () => toggleHeroSelection(hero.heroName, card));
+                DOMElements.heroRoster.appendChild(card);
+            });
+        };
+
+        const renderTeam = (team, container, isPlayerTeam) => {
+            container.innerHTML = '';
+            team.forEach(hero => {
+                container.innerHTML += `
+                <div class="bg-gray-900 p-4 rounded-lg" data-hero-id="${hero.id}">
+                    <!-- Hero Info -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 bg-green-500 rounded flex items-center justify-center font-bold text-black text-2xl">${isPlayerTeam ? 'H' : 'E'}${hero.teamIndex + 1}</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold">${hero.heroName}</h3>
+                            <!-- Health Bar -->
+                            <div class="w-full bg-gray-700 rounded-full h-5 relative overflow-hidden border border-gray-600">
+                                <div id="hp-bar-${hero.id}" class="bg-red-600 h-full rounded-full health-bar-inner" style="width: ${hero.currentHp / hero.maxHp * 100}%"></div>
+                                <span class="absolute inset-0 text-center text-sm font-semibold leading-5">${hero.currentHp}/${hero.maxHp}</span>
+                            </div>
+                            <!-- Mana Bar -->
+                             <div class="w-full bg-gray-700 rounded-full h-5 mt-1 relative overflow-hidden border border-gray-600">
+                                <div id="mp-bar-${hero.id}" class="bg-blue-500 h-full rounded-full mana-bar-inner" style="width: ${hero.currentMp / hero.maxMp * 100}%"></div>
+                                <span class="absolute inset-0 text-center text-sm font-semibold leading-5">${hero.currentMp}/${hero.maxMp}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Status Icons -->
+                    <div id="status-container-${hero.id}" class="flex gap-2 mt-2 h-6"></div>
+                    <!-- Action Commands (Player Only) -->
+                    ${isPlayerTeam ? `
+                    <div class="mt-4 flex gap-2 justify-around">
+                        ${generateActionIcon(hero, 'A')}
+                        ${generateActionIcon(hero, 'S1')}
+                        ${generateActionIcon(hero, 'S2')}
+                        ${generateActionIcon(hero, 'S3')}
+                        ${generateActionIcon(hero, 'U')}
+                    </div>
+                    ` : `
+                    <!-- Target Box for Enemies -->
+                    <div class="mt-4 h-16 w-full bg-gray-800 rounded-lg border-2 border-gray-700 flex items-center justify-center text-gray-500 target-box" data-target-id="${hero.id}">
+                        Drop Action Here
+                    </div>
+                    `}
+                </div>
+                `;
+            });
+        };
+        
+        const generateActionIcon = (hero, type) => {
+            let name, desc;
+            switch(type) {
+                case 'A': name = 'Attack'; desc = 'Normal Attack'; break;
+                case 'S1': name = hero.s1_name; desc = hero.s1_desc; break;
+                case 'S2': name = hero.s2_name; desc = hero.s2_desc; break;
+                case 'S3': name = hero.s3_name; desc = hero.s3_desc; break;
+                case 'U': name = hero.u_name; desc = hero.u_desc; break;
+            }
+
+            return `
+            <div title="${name}: ${desc}" class="action-icon w-12 h-12 bg-yellow-500 rounded flex items-center justify-center font-bold text-black cursor-grab" draggable="true" data-hero-id="${hero.id}" data-action-type="${type}">
+                ${type}
+            </div>
+            `;
+        }
+
+        const updateUI = () => {
+             [...gameState.playerTeam, ...gameState.enemyTeam].forEach(hero => {
+                if (!hero.isAlive) {
+                    document.querySelector(`[data-hero-id="${hero.id}"]`).style.opacity = '0.4';
+                    return;
+                }
+                const hpBar = document.getElementById(`hp-bar-${hero.id}`);
+                const mpBar = document.getElementById(`mp-bar-${hero.id}`);
+                if(hpBar) hpBar.style.width = `${hero.currentHp / hero.maxHp * 100}%`;
+                if(mpBar) mpBar.style.width = `${hero.currentMp / hero.maxMp * 100}%`;
+                hpBar.nextElementSibling.textContent = `${hero.currentHp}/${hero.maxHp}`;
+                mpBar.nextElementSibling.textContent = `${hero.currentMp}/${hero.maxMp}`;
+
+                // Update status icons
+                // TODO: Implement status icon rendering logic
+            });
+        };
+
+
+        // --- GAME LOGIC ---
+
+        const initializeHeroInstance = (heroData, id, teamIndex) => {
+            const baseStats = { hp: 20, mp: 10, speed: 20, hpRegen: 1, mpRegen: 1, damage: 2 };
+            let maxHp = baseStats.hp;
+            let maxMp = baseStats.mp;
+            let speed = baseStats.speed;
+
+            switch (heroData.attribute) {
+                case 'STR': maxHp += 10; speed -= 4; break;
+                case 'AGI': maxHp -= 2; speed += 3; break;
+                case 'INT': maxMp += 5; speed -= 2; break;
+            }
+
+            return {
+                ...heroData,
+                id,
+                teamIndex,
+                maxHp,
+                maxMp,
+                speed,
+                currentHp: maxHp,
+                currentMp: maxMp,
+                isAlive: true,
+                statusEffects: [],
+                cooldowns: {},
+            };
+        };
+        
+        const toggleHeroSelection = (heroName, cardElement) => {
+            if (gameState.selectedHeroes.has(heroName)) {
+                gameState.selectedHeroes.delete(heroName);
+                cardElement.classList.remove('selected');
+            } else {
+                if (gameState.selectedHeroes.size < 3) {
+                    gameState.selectedHeroes.add(heroName);
+                    cardElement.classList.add('selected');
+                }
+            }
+            DOMElements.selectedCount.textContent = gameState.selectedHeroes.size;
+            DOMElements.startGameBtn.disabled = gameState.selectedHeroes.size !== 3;
+        };
+
+        const startGame = () => {
+            // Setup Player Team
+            gameState.playerTeam = Array.from(gameState.selectedHeroes).map((name, i) => {
+                const heroData = gameState.allHeroes.find(h => h.heroName === name);
+                return initializeHeroInstance(heroData, `p${i}`, i);
+            });
+
+            // Setup Enemy Team (randomly for now)
+            const remainingHeroes = gameState.allHeroes.filter(h => !gameState.selectedHeroes.has(h.heroName));
+            gameState.enemyTeam = [];
+            for (let i = 0; i < 3; i++) {
+                const randomIndex = Math.floor(Math.random() * remainingHeroes.length);
+                const heroData = remainingHeroes.splice(randomIndex, 1)[0];
+                gameState.enemyTeam.push(initializeHeroInstance(heroData, `e${i}`, i));
+            }
+            
+            gameState.phase = 'planning';
+            showScreen(DOMElements.gameScreen);
+            startPlanningPhase();
+        };
+
+        const startPlanningPhase = () => {
+            gameState.commandQueue = [];
+            DOMElements.turnIndicator.textContent = `Turn ${gameState.turn}: Planning Phase`;
+            DOMElements.phaseInstructions.textContent = 'Drag actions onto enemy heroes to set your commands.';
+            DOMElements.commitTurnBtn.disabled = false;
+            
+            renderTeam(gameState.playerTeam, DOMElements.playerTeamContainer, true);
+            renderTeam(gameState.enemyTeam, DOMElements.enemyTeamContainer, false);
+            setupDragAndDrop();
+        };
+
+        const executeCombatPhase = async () => {
+            DOMElements.phaseInstructions.textContent = 'Watching combat unfold...';
+            DOMElements.commitTurnBtn.disabled = true;
+
+            // TODO: Implement combat logic based on command queue and hero speeds
+            console.log('Executing combat with commands:', gameState.commandQueue);
+            
+            // This is a placeholder for the actual turn-based combat logic
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate combat time
+            
+            // End of turn checks
+            const isPlayerDefeated = gameState.playerTeam.every(h => !h.isAlive);
+            const isEnemyDefeated = gameState.enemyTeam.every(h => !h.isAlive);
+
+            if (isPlayerDefeated || isEnemyDefeated) {
+                endGame(isEnemyDefeated);
+            } else {
+                gameState.turn++;
+                startPlanningPhase();
+            }
+        };
+
+        const endGame = (playerWon) => {
+            gameState.phase = 'end';
+            showScreen(DOMElements.endScreen);
+            if (playerWon) {
+                DOMElements.endTitle.textContent = 'Victory!';
+                DOMElements.endMessage.textContent = 'You have defeated the enemy team.';
+            } else {
+                DOMElements.endTitle.textContent = 'Defeat';
+                DOMElements.endMessage.textContent = 'Your team has been wiped out.';
+            }
+        };
+        
+        const resetGame = () => {
+            gameState = {
+                ...gameState,
+                playerTeam: [],
+                enemyTeam: [],
+                turn: 1,
+                phase: 'hero-selection',
+                commandQueue: [],
+                selectedHeroes: new Set(),
+            };
+            document.querySelectorAll('.hero-card.selected').forEach(c => c.classList.remove('selected'));
+            DOMElements.selectedCount.textContent = '0';
+            DOMElements.startGameBtn.disabled = true;
+            showScreen(DOMElements.heroSelectionScreen);
+        };
+
+        // --- DRAG AND DROP LOGIC ---
+        function setupDragAndDrop() {
+            const actionIcons = document.querySelectorAll('.action-icon');
+            const targetBoxes = document.querySelectorAll('.target-box');
+
+            actionIcons.forEach(icon => {
+                icon.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify({
+                        heroId: icon.dataset.heroId,
+                        actionType: icon.dataset.actionType
+                    }));
+                    setTimeout(() => icon.classList.add('dragging'), 0);
+                });
+
+                icon.addEventListener('dragend', () => {
+                    icon.classList.remove('dragging');
+                });
+            });
+
+            targetBoxes.forEach(box => {
+                box.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    box.classList.add('drag-over');
+                });
+
+                box.addEventListener('dragleave', () => {
+                    box.classList.remove('drag-over');
+                });
+
+                box.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    box.classList.remove('drag-over');
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    const command = {
+                        sourceId: data.heroId,
+                        actionType: data.actionType,
+                        targetId: box.dataset.targetId
+                    };
+                    
+                    // Prevent duplicate commands from the same hero
+                    gameState.commandQueue = gameState.commandQueue.filter(c => c.sourceId !== command.sourceId);
+                    gameState.commandQueue.push(command);
+                    
+                    // Visual feedback
+                    box.innerHTML = `<span class="text-green-400">Action Set!</span><br><small>${data.actionType} from Hero ${command.sourceId}</small>`;
+                    console.log('Command added:', gameState.commandQueue);
+                });
+            });
+        }
+
+
+        // --- INITIALIZATION ---
+        const init = async () => {
+            try {
+                const response = await fetch(HERO_DATA_PATH);
+                if (!response.ok) throw new Error(`Network response was not ok. Make sure heroes.csv is in the same folder as index.html`);
+                const csvData = await response.text();
+                gameState.allHeroes = csvToArray(csvData);
+                // Filter out empty rows that might result from trailing newlines in the CSV
+                gameState.allHeroes = gameState.allHeroes.filter(hero => hero.heroName && hero.heroName.trim() !== "");
+                console.log('Hero data loaded:', gameState.allHeroes);
+                
+                renderHeroSelection();
+                showScreen(DOMElements.heroSelectionScreen);
+
+            } catch (error) {
+                console.error('Failed to load hero data:', error);
+                DOMElements.loadingScreen.innerHTML = `<h1 class="text-4xl font-bold mb-4 text-red-500">Error Loading Data</h1><p class="text-xl text-gray-400">Could not fetch data from heroes.csv. Ensure the file exists and is accessible.</p>`;
+            }
+        };
+
+        DOMElements.startGameBtn.addEventListener('click', startGame);
+        DOMElements.commitTurnBtn.addEventListener('click', executeCombatPhase);
+        DOMElements.playAgainBtn.addEventListener('click', resetGame);
+
+        init();
+    </script>
+</body>
+</html>
