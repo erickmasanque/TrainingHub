@@ -55,6 +55,7 @@ function App() {
   const [rects, setRects] = useState([]);
   const [dRect, setDRect] = useState(null);
   const [flash, setFlash] = useState(false);
+  const [showAns, setShowAns] = useState(false);
 
   const bRef = useRef(null);
   const tRef = useRef(null);
@@ -264,8 +265,19 @@ function App() {
       ),
 
       /* WHITEBOARD AREA */
-      React.createElement("div",{style:{flex:1,position:"relative",overflow:"hidden"}},
-        React.createElement("div",{ref:bRef,onPointerDown:onBoardDown,style:{width:"100%",height:"100%",position:"relative",backgroundColor:C.board,backgroundImage:"linear-gradient("+C.grid+" 1px,transparent 1px),linear-gradient(90deg,"+C.grid+" 1px,transparent 1px)",backgroundSize:"40px 40px",cursor:tool==="draw"?"crosshair":drag?"grabbing":"default",touchAction:"none"}},
+      React.createElement("div",{style:{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}},
+        /* EQUATION STRIP */
+        ac.length>0&&React.createElement("div",{style:{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 12px",background:showAns?(total>0?C.posLt:total<0?C.negLt:"#F1F5F9"):"#F8FAFC",borderBottom:"2px solid "+(showAns?(total>0?C.pos:total<0?C.neg:C.mid):"#CBD5E1")}},
+          React.createElement("div",{style:{flex:1}}),
+          React.createElement("div",{style:{display:"flex",alignItems:"center",flexWrap:"wrap",gap:2,fontFamily:"'Fredoka','Nunito',sans-serif",fontWeight:700,fontSize:"clamp(22px,3.5vw,38px)",lineHeight:1.1,letterSpacing:"0.5px"}},
+            renderEqParts(expr,posN,negN,showAns?total:null,C)
+          ),
+          React.createElement("div",{style:{flex:1,display:"flex",justifyContent:"flex-end"}},
+            React.createElement("button",{onClick:()=>setShowAns(a=>!a),style:{padding:"5px 14px",borderRadius:20,border:"2px solid "+(showAns?"#CBD5E1":C.green),background:showAns?"transparent":C.green,color:showAns?C.mid:"#fff",fontFamily:"inherit",fontWeight:700,fontSize:"12px",cursor:"pointer",transition:"all 0.2s"}},showAns?"Hide":"👁 Show Answer"),
+          ),
+        ),
+
+        React.createElement("div",{ref:bRef,onPointerDown:onBoardDown,style:{flex:1,width:"100%",position:"relative",backgroundColor:C.board,backgroundImage:"linear-gradient("+C.grid+" 1px,transparent 1px),linear-gradient(90deg,"+C.grid+" 1px,transparent 1px)",backgroundSize:"40px 40px",cursor:tool==="draw"?"crosshair":drag?"grabbing":"default",touchAction:"none"}},
 
           /* Empty state */
           chips.length===0 && rects.length===0 && React.createElement("div",{style:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",textAlign:"center",color:C.mid,pointerEvents:"none"}},
@@ -327,6 +339,38 @@ function btn(bg){return{display:"inline-flex",alignItems:"center",gap:"4px",padd
 function sm(bg){return{padding:"3px 9px",borderRadius:6,border:"none",backgroundColor:bg,color:"#fff",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:"11px",opacity:0.85};}
 function tog(a){return{padding:"4px 10px",borderRadius:8,border:a?"2px solid #3B82F6":"2px solid transparent",backgroundColor:a?"#DBEAFE":"transparent",color:a?"#1D4ED8":"#64748B",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:"12px"};}
 function badge(l,n,co,bg){return React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"4px",padding:"3px 8px",borderRadius:8,backgroundColor:bg,fontSize:"12px",fontWeight:700,color:co}},React.createElement("span",null,l+":"),React.createElement("span",{style:{fontSize:"15px"}},n));}
+function renderEqParts(expr,posN,negN,total,C){
+  const mk=(text,color,key)=>React.createElement("span",{key,style:{color,fontWeight:800}},text);
+  const f=n=>n>0?"+"+n:n===0?"0":"−"+Math.abs(n);
+  const rc=total>0?C.pos:total<0?C.neg:C.mid;
+  const unknown=total===null;
+  const eqEl=mk(" = ",C.accent,"eq");
+  const rhsEl=mk(unknown?"?":f(total),unknown?C.mid:rc,"rhs");
+  if(expr.trim()){
+    // Parse the typed expression into colored tokens
+    const s=expr.trim().replace(/\s+/g,"");
+    const parts=[];let i=0,idx=0;
+    while(i<s.length){
+      let op=null;
+      if(i>0&&(s[i]==="+"||s[i]==="-"||s[i]==="−")){op=s[i]==="-"||s[i]==="−"?"−":"+";i++;}
+      const hp=s[i]==="(";if(hp)i++;
+      let gs="+",hs=false;
+      if(s[i]==="+"||s[i]==="-"||s[i]==="−"){gs=s[i]==="-"||s[i]==="−"?"−":"+";hs=true;i++;}
+      let num="";while(i<s.length&&s[i]>="0"&&s[i]<="9"){num+=s[i];i++;}
+      if(s[i]===")")i++;
+      if(num){
+        if(op!==null)parts.push(mk(" "+op+" ","#475569","op"+idx));
+        parts.push(mk(hp?"("+gs+num+")":(hs?gs+num:num),gs==="+"?C.pos:C.neg,"g"+idx));
+        idx++;
+      }else{i++;}
+    }
+    return [...parts,eqEl,rhsEl];
+  }
+  if(posN>0&&negN>0)return[mk("(+"+posN+")",C.pos,"a"),mk(" + ","#475569","b"),mk("(−"+negN+")",C.neg,"c"),eqEl,rhsEl];
+  if(posN>0)return[mk("(+"+posN+")",C.pos,"a"),eqEl,rhsEl];
+  if(negN>0)return[mk("(−"+negN+")",C.neg,"a"),eqEl,rhsEl];
+  return[];
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
