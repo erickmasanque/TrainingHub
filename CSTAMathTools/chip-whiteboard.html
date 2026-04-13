@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Chip Whiteboard — Integer Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body, #root { width:100%; height:100%; overflow:hidden; }
+  body { font-family: 'Nunito', 'Segoe UI', sans-serif; }
+  button:hover { filter: brightness(1.08); }
+  button:active { transform: scale(0.96); }
+  input:focus { border-color: #3B82F6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  @keyframes popIn { 0%{transform:translate(-50%,-50%) scale(0.3);opacity:0} 50%{transform:translate(-50%,-50%) scale(1.15);opacity:1} 100%{transform:translate(-50%,-50%) scale(1)} }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useCallback, useEffect } = React;
+
+const CHIP_SIZE = 56;
+const C = {
+  pos:"#3B82F6", posDk:"#2563EB", posLt:"#DBEAFE",
+  neg:"#EF4444", negDk:"#DC2626", negLt:"#FEE2E2",
+  zero:"#94A3B8", accent:"#F59E0B", green:"#10B981",
+  board:"#F1F0EB", grid:"#E2E0D8",
+  dk:"#1E293B", mid:"#64748B", wh:"#FFFFFF", sf:"#FAFAF8",
+};
+
+const RS = [
+  { name:"Zero Pair", color:"#94A3B8", bdr:"#64748B", bg:"rgba(148,163,184,0.12)", l:"0" },
+  { name:"Answer", color:"#10B981", bdr:"#059669", bg:"rgba(16,185,129,0.10)", l:"✓" },
+  { name:"Group A", color:"#3B82F6", bdr:"#2563EB", bg:"rgba(59,130,246,0.08)", l:"A" },
+  { name:"Group B", color:"#EF4444", bdr:"#DC2626", bg:"rgba(239,68,68,0.08)", l:"B" },
+  { name:"Highlight", color:"#F59E0B", bdr:"#D97706", bg:"rgba(245,158,11,0.10)", l:"★" },
+];
+
+let nCId = 1, nRId = 1;
+function mkChip(v,x,y){ return {id:nCId++, value:v, x, y, removing:false}; }
+
+function App() {
+  const [chips, setChips] = useState([]);
+  const [drag, setDrag] = useState(null);
+  const [dOff, setDOff] = useState({x:0,y:0});
+  const [overT, setOverT] = useState(false);
+  const [hist, setHist] = useState([]);
+  const [expr, setExpr] = useState("");
+  const [tool, setTool] = useState("pointer");
+  const [rsIdx, setRsIdx] = useState(0);
+  const [rects, setRects] = useState([]);
+  const [dRect, setDRect] = useState(null);
+  const [flash, setFlash] = useState(false);
+
+  const bRef = useRef(null);
+  const tRef = useRef(null);
+
+  const ac = chips.filter(c => !c.removing);
+  const total = ac.reduce((s,c) => s+c.value, 0);
+  const posN = ac.filter(c => c.value>0).length;
+  const negN = ac.filter(c => c.value<0).length;
+
+  const push = useCallback(() => {
+    setHist(h => [...h.slice(-30), {chips:[...chips], rects:[...rects]}]);
+  }, [chips, rects]);
+
+  const addChip = useCallback((v) => {
+    const b = bRef.current; if(!b) return;
+    const r = b.getBoundingClientRect(); const m=50;
+    push();
+    setChips(p => [...p, mkChip(v, m+Math.random()*(r.width-CHIP_SIZE-m*2), m+Math.random()*(r.height-CHIP_SIZE-m*2))]);
+  }, [push]);
+
+  const addMult = useCallback((v,n) => {
+    const b = bRef.current; if(!b) return;
+    const r = b.getBoundingClientRect(); const m=50;
+    push();
+    const nc=[];
+    for(let i=0;i<n;i++){
+      const col=i%5, row=Math.floor(i/5);
+      const bx = v>0 ? m : r.width/2+20;
+      nc.push(mkChip(v, bx+col*(CHIP_SIZE+10), m+row*(CHIP_SIZE+10)));
+    }
+    setChips(p => [...p,...nc]);
+  }, [push]);
+
+  const rmChip = useCallback(id => { push(); setChips(p=>p.filter(c=>c.id!==id)); }, [push]);
+
+  const clearAll = useCallback(() => {
+    if(chips.length===0 && rects.length===0) return;
+    push(); setChips([]); setRects([]);
+  }, [chips,rects,push]);
+
+  const undo = useCallback(() => {
+    if(hist.length===0) return;
+    const prev = hist[hist.length-1];
+    setHist(h=>h.slice(0,-1));
+    setChips(prev.chips); setRects(prev.rects);
+  }, [hist]);
+
+  const findZP = useCallback(() => {
+    const pos=ac.filter(c=>c.value>0), neg=ac.filter(c=>c.value<0);
+    const n=Math.min(pos.length,neg.length);
+    if(n===0) return;
+    push();
+    const ids=[];
+    for(let i=0;i<n;i++){ids.push(pos[i].id, neg[i].id);}
+    setFlash(true);
+    setChips(p=>p.map(c=>ids.includes(c.id)?{...c,removing:true}:c));
+    setTimeout(()=>{setChips(p=>p.filter(c=>!ids.includes(c.id)));setFlash(false);},800);
+  }, [ac, push]);
+
+  const parseExpr = useCallback(() => {
+    const e = expr.trim().replace(/\s+/g,""); if(!e) return;
+    const tokens=[]; let i=0;
+    while(i<e.length){
+      let sign=1;
+      if(i>0&&(e[i]==="+"||e[i]==="-")){if(e[i]==="-")sign=-1;i++;}
+      else if(i===0&&e[i]==="-"){sign=-1;i++;}
+      else if(i===0&&e[i]==="+"){i++;}
+      if(e[i]==="(")i++;
+      let is=1;
+      if(e[i]==="+"||e[i]==="-"){if(e[i]==="-")is=-1;i++;}
+      let ns="";
+      while(i<e.length&&e[i]>="0"&&e[i]<="9"){ns+=e[i];i++;}
+      if(e[i]===")")i++;
+      if(ns) tokens.push(sign*is*parseInt(ns));
+    }
+    if(tokens.length===0) return;
+    const b=bRef.current; if(!b) return;
+    push();
+    const nc=[]; let xC=40, yC=50;
+    const bw=b.getBoundingClientRect().width;
+    tokens.forEach((v,ti)=>{
+      const abs=Math.abs(v), cv=v>0?1:-1;
+      for(let j=0;j<abs;j++){
+        if(xC+CHIP_SIZE+10>bw-40){xC=40;yC+=CHIP_SIZE+12;}
+        nc.push(mkChip(cv,xC,yC)); xC+=CHIP_SIZE+10;
+      }
+      if(ti<tokens.length-1) xC+=30;
+    });
+    setChips(p=>[...p,...nc]);
+  }, [expr, push]);
+
+  // Chip drag
+  const onChipDown = useCallback((e,chip)=>{
+    if(tool!=="pointer") return;
+    e.preventDefault(); e.stopPropagation();
+    const br=bRef.current.getBoundingClientRect();
+    setDrag(chip.id);
+    setDOff({x:e.clientX-br.left-chip.x, y:e.clientY-br.top-chip.y});
+  },[tool]);
+
+  const onMove = useCallback(e=>{
+    if(drag!==null){
+      const b=bRef.current, t=tRef.current; if(!b) return;
+      const br=b.getBoundingClientRect();
+      const x=Math.max(0,Math.min(e.clientX-br.left-dOff.x,br.width-CHIP_SIZE));
+      const y=Math.max(0,Math.min(e.clientY-br.top-dOff.y,br.height-CHIP_SIZE));
+      setChips(p=>p.map(c=>c.id===drag?{...c,x,y}:c));
+      if(t){const tr=t.getBoundingClientRect(); setOverT(e.clientX>=tr.left&&e.clientX<=tr.right&&e.clientY>=tr.top&&e.clientY<=tr.bottom);}
+    }
+    if(dRect){
+      const br=bRef.current.getBoundingClientRect();
+      setDRect(p=>p?{...p,w:e.clientX-br.left-p.x,h:e.clientY-br.top-p.y}:null);
+    }
+  },[drag,dOff,dRect]);
+
+  const onUp = useCallback(()=>{
+    if(drag!==null&&overT){push();setChips(p=>p.filter(c=>c.id!==drag));}
+    setDrag(null); setOverT(false);
+    if(dRect){
+      const w=Math.abs(dRect.w), h=Math.abs(dRect.h);
+      if(w>30&&h>30){
+        push();
+        setRects(p=>[...p,{
+          id:nRId++,
+          x:dRect.w<0?dRect.x+dRect.w:dRect.x,
+          y:dRect.h<0?dRect.y+dRect.h:dRect.y,
+          w,h,si:dRect.si
+        }]);
+      }
+      setDRect(null);
+    }
+  },[drag,overT,dRect,push]);
+
+  const onBoardDown = useCallback(e=>{
+    if(tool!=="draw") return;
+    const br=bRef.current.getBoundingClientRect();
+    setDRect({x:e.clientX-br.left,y:e.clientY-br.top,w:0,h:0,si:rsIdx});
+  },[tool,rsIdx]);
+
+  const rmRect = useCallback(id=>{push();setRects(p=>p.filter(r=>r.id!==id));},[push]);
+
+  useEffect(()=>{
+    window.addEventListener("pointermove",onMove);
+    window.addEventListener("pointerup",onUp);
+    return ()=>{window.removeEventListener("pointermove",onMove);window.removeEventListener("pointerup",onUp);};
+  },[onMove,onUp]);
+
+  useEffect(()=>{
+    const h=e=>{
+      if(e.target.tagName==="INPUT") return;
+      if(e.ctrlKey&&e.key==="z"){e.preventDefault();undo();}
+      if(e.key==="Escape"){setTool("pointer");setDRect(null);}
+      if((e.key==="d"||e.key==="D")&&!e.ctrlKey) setTool(t=>t==="draw"?"pointer":"draw");
+    };
+    window.addEventListener("keydown",h);
+    return ()=>window.removeEventListener("keydown",h);
+  },[undo]);
+
+  const fmt = n => n>0?"+"+n:n===0?"0":""+n;
+
+  const dn = dRect?{
+    x:dRect.w<0?dRect.x+dRect.w:dRect.x,
+    y:dRect.h<0?dRect.y+dRect.h:dRect.y,
+    w:Math.abs(dRect.w),h:Math.abs(dRect.h),si:dRect.si
+  }:null;
+
+  return (
+    React.createElement("div", {style:{width:"100vw",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Nunito','Segoe UI',sans-serif",background:C.sf,overflow:"hidden",userSelect:"none"}},
+
+      /* TOP TOOLBAR */
+      React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 12px",background:C.dk,color:C.wh,flexShrink:0,flexWrap:"wrap",gap:"6px"}},
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}},
+          React.createElement("span",{style:{fontSize:"11px",fontWeight:700,color:"#94A3B8",textTransform:"uppercase",letterSpacing:"0.5px"}},"Chips:"),
+          React.createElement("button",{onClick:()=>addChip(1),style:btn(C.pos)},"+1 Blue"),
+          React.createElement("button",{onClick:()=>addChip(-1),style:btn(C.neg)},"−1 Red"),
+          React.createElement("div",{style:{width:1,height:22,background:"#334155",margin:"0 2px"}}),
+          [2,3,4,5].map(n=>React.createElement("button",{key:"p"+n,onClick:()=>addMult(1,n),style:sm(C.pos)},"+"+n)),
+          React.createElement("div",{style:{width:1,height:22,background:"#334155",margin:"0 2px"}}),
+          [2,3,4,5].map(n=>React.createElement("button",{key:"n"+n,onClick:()=>addMult(-1,n),style:sm(C.neg)},"−"+n)),
+        ),
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}},
+          React.createElement("button",{onClick:findZP,style:btn(C.accent)},"⚡ Zero Pairs"),
+          React.createElement("button",{onClick:undo,disabled:hist.length===0,style:{...btn(hist.length===0?"#475569":"#64748B"),opacity:hist.length===0?0.5:1}},"↩ Undo"),
+          React.createElement("button",{onClick:clearAll,style:btn("#DC2626")},"✕ Clear"),
+        ),
+      ),
+
+      /* SECOND TOOLBAR */
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"5px 12px",background:"#F8FAFC",borderBottom:"1px solid #E2E8F0",flexShrink:0,flexWrap:"wrap"}},
+        React.createElement("span",{style:{fontSize:"11px",fontWeight:700,color:C.mid,textTransform:"uppercase"}},"Expr:"),
+        React.createElement("input",{type:"text",value:expr,onChange:e=>setExpr(e.target.value),onKeyDown:e=>{if(e.key==="Enter")parseExpr();},placeholder:"e.g. (+3)+(-2)",style:{width:180,padding:"5px 10px",border:"2px solid #CBD5E1",borderRadius:8,fontFamily:"inherit",fontSize:"13px",fontWeight:600,outline:"none",background:"#fff"}}),
+        React.createElement("button",{onClick:parseExpr,style:{...btn(C.green),padding:"5px 12px"}},"▶ Place"),
+        React.createElement("div",{style:{width:1,height:22,background:"#E2E8F0",margin:"0 2px"}}),
+        React.createElement("span",{style:{fontSize:"11px",fontWeight:700,color:C.mid,textTransform:"uppercase"}},"Tool:"),
+        React.createElement("button",{onClick:()=>{setTool("pointer");setDRect(null);},style:tog(tool==="pointer")},"👆 Pointer"),
+        React.createElement("button",{onClick:()=>setTool("draw"),style:tog(tool==="draw")},"✏️ Draw Rect"),
+
+        tool==="draw" && React.createElement("div",{style:{display:"flex",gap:"3px",marginLeft:"4px"}},
+          RS.map((rs,i)=>React.createElement("button",{key:i,onClick:()=>setRsIdx(i),style:{padding:"2px 8px",borderRadius:6,border:i===rsIdx?"2px solid "+rs.color:"2px solid transparent",background:i===rsIdx?rs.bg:"transparent",color:rs.color,fontWeight:700,fontSize:"11px",cursor:"pointer",fontFamily:"inherit"}},rs.l+" "+rs.name))
+        ),
+
+        React.createElement("div",{style:{marginLeft:"auto",display:"flex",alignItems:"center",gap:"8px"}},
+          badge("Blue",posN,C.pos,C.posLt),
+          badge("Red",negN,C.neg,C.negLt),
+          React.createElement("div",{style:{padding:"4px 16px",borderRadius:10,background:total===0?"#F1F5F9":total>0?C.posLt:C.negLt,border:"2px solid "+(total===0?C.mid:total>0?C.pos:C.neg),fontWeight:800,fontSize:"20px",fontFamily:"'Fredoka','Nunito',sans-serif",color:total===0?C.mid:total>0?C.pos:C.neg,minWidth:60,textAlign:"center",transition:"all 0.3s"}},fmt(total)),
+        ),
+      ),
+
+      /* WHITEBOARD AREA */
+      React.createElement("div",{style:{flex:1,position:"relative",overflow:"hidden"}},
+        React.createElement("div",{ref:bRef,onPointerDown:onBoardDown,style:{width:"100%",height:"100%",position:"relative",backgroundColor:C.board,backgroundImage:"linear-gradient("+C.grid+" 1px,transparent 1px),linear-gradient(90deg,"+C.grid+" 1px,transparent 1px)",backgroundSize:"40px 40px",cursor:tool==="draw"?"crosshair":drag?"grabbing":"default",touchAction:"none"}},
+
+          /* Empty state */
+          chips.length===0 && rects.length===0 && React.createElement("div",{style:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",textAlign:"center",color:C.mid,pointerEvents:"none"}},
+            React.createElement("div",{style:{fontSize:"48px",marginBottom:10,opacity:0.4}},"🔵🔴"),
+            React.createElement("div",{style:{fontSize:"17px",fontWeight:700,opacity:0.5}},"Add chips using the toolbar"),
+            React.createElement("div",{style:{fontSize:"13px",opacity:0.4,marginTop:4}},"Type an expression or click +1 / −1 buttons"),
+          ),
+
+          /* Saved rectangles */
+          rects.map(r=>{
+            const rs=RS[r.si]||RS[0];
+            return React.createElement("div",{key:r.id,style:{position:"absolute",left:r.x,top:r.y,width:r.w,height:r.h,border:"3px dashed "+rs.bdr,borderRadius:14,backgroundColor:rs.bg,zIndex:5}},
+              React.createElement("div",{style:{position:"absolute",top:-13,left:10,backgroundColor:rs.color,color:"#fff",padding:"1px 10px",borderRadius:6,fontSize:"11px",fontWeight:700,whiteSpace:"nowrap"}},rs.name),
+              React.createElement("button",{onClick:e=>{e.stopPropagation();rmRect(r.id);},style:{position:"absolute",top:-10,right:-10,width:22,height:22,borderRadius:"50%",backgroundColor:"#EF4444",color:"#fff",border:"2px solid #fff",cursor:"pointer",fontSize:"11px",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0}},"✕"),
+            );
+          }),
+
+          /* Drawing preview */
+          dn && dn.w>5 && dn.h>5 && React.createElement("div",{style:{position:"absolute",left:dn.x,top:dn.y,width:dn.w,height:dn.h,border:"3px dashed "+RS[dn.si].bdr,borderRadius:14,backgroundColor:RS[dn.si].bg,zIndex:5,pointerEvents:"none"}}),
+
+          /* Chips */
+          chips.map(chip=>{
+            const ip=chip.value>0;
+            const bg=chip.removing?C.zero:ip?C.pos:C.neg;
+            const bd=chip.removing?C.zero:ip?C.posDk:C.negDk;
+            const isD=drag===chip.id;
+            return React.createElement("div",{key:chip.id,onPointerDown:e=>onChipDown(e,chip),onDoubleClick:()=>rmChip(chip.id),title:"Drag to move · Double-click to remove",style:{position:"absolute",left:chip.x,top:chip.y,width:CHIP_SIZE,height:CHIP_SIZE,borderRadius:"50%",backgroundColor:bg,border:"3px solid "+bd,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Fredoka','Nunito',sans-serif",fontWeight:700,fontSize:"18px",cursor:tool==="draw"?"crosshair":isD?"grabbing":"grab",boxShadow:isD?"0 8px 24px rgba(0,0,0,0.3),0 0 0 3px #F59E0B":chip.removing?"none":"0 3px 10px rgba(0,0,0,0.2)",transform:isD?"scale(1.15)":chip.removing?"scale(0) rotate(180deg)":"scale(1)",transition:isD?"transform 0.1s,box-shadow 0.1s":"transform 0.5s cubic-bezier(0.34,1.56,0.64,1),opacity 0.5s,box-shadow 0.2s",opacity:chip.removing?0:1,zIndex:isD?100:10,touchAction:"none",userSelect:"none",textShadow:"0 1px 2px rgba(0,0,0,0.3)"}},
+              ip?"+1":"−1",
+              !chip.removing && React.createElement("div",{style:{position:"absolute",top:7,left:12,width:16,height:8,borderRadius:"50%",backgroundColor:"rgba(255,255,255,0.4)",transform:"rotate(-30deg)",pointerEvents:"none"}}),
+            );
+          }),
+
+          /* Flash */
+          flash && React.createElement("div",{style:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",fontSize:"42px",fontWeight:800,color:C.accent,fontFamily:"'Fredoka',sans-serif",textShadow:"0 2px 20px rgba(245,158,11,0.5)",animation:"popIn 0.6s ease-out",pointerEvents:"none",zIndex:200}},"💥 Zero Pairs Removed!"),
+        ),
+
+        /* TRASH BIN */
+        React.createElement("div",{ref:tRef,style:{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",width:overT?170:140,height:overT?74:62,borderRadius:16,backgroundColor:overT?"#DC2626":"#FEE2E2",border:overT?"3px solid #991B1B":"3px dashed #F87171",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,transition:"all 0.25s cubic-bezier(0.34,1.56,0.64,1)",zIndex:50,pointerEvents:"none",boxShadow:overT?"0 6px 24px rgba(220,38,38,0.4)":"0 2px 10px rgba(0,0,0,0.08)",opacity:drag?1:0.4}},
+          React.createElement("span",{style:{fontSize:overT?"28px":"22px",transition:"font-size 0.2s"}},"🗑️"),
+          React.createElement("span",{style:{fontSize:"11px",fontWeight:700,color:overT?"#fff":"#DC2626"}},overT?"Release to delete!":"Drag here to delete"),
+        ),
+      ),
+
+      /* BOTTOM BAR */
+      React.createElement("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",padding:"5px 12px",background:"#fff",borderTop:"1px solid #E2E8F0",gap:"18px",flexShrink:0,fontSize:"11px",color:C.mid,flexWrap:"wrap"}},
+        React.createElement("span",null,"🔵 Blue = ",React.createElement("b",{style:{color:C.pos}},"+1")),
+        React.createElement("span",null,"🔴 Red = ",React.createElement("b",{style:{color:C.neg}},"−1")),
+        React.createElement("span",null,"🗑️ Drag to trash"),
+        React.createElement("span",null,"✏️ ",React.createElement("b",null,"D")," = draw"),
+        React.createElement("span",null,"↩ ",React.createElement("b",null,"Ctrl+Z")," undo"),
+        React.createElement("span",null,"Double-click = remove"),
+        React.createElement("a",{href:"index.html",style:{color:"#3B82F6",textDecoration:"none",fontWeight:700}},"← Back"),
+      ),
+    )
+  );
+}
+
+function btn(bg){return{display:"inline-flex",alignItems:"center",gap:"4px",padding:"5px 12px",borderRadius:8,border:"none",backgroundColor:bg,color:"#fff",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:"12px"};}
+function sm(bg){return{padding:"3px 9px",borderRadius:6,border:"none",backgroundColor:bg,color:"#fff",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:"11px",opacity:0.85};}
+function tog(a){return{padding:"4px 10px",borderRadius:8,border:a?"2px solid #3B82F6":"2px solid transparent",backgroundColor:a?"#DBEAFE":"transparent",color:a?"#1D4ED8":"#64748B",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:"12px"};}
+function badge(l,n,co,bg){return React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"4px",padding:"3px 8px",borderRadius:8,backgroundColor:bg,fontSize:"12px",fontWeight:700,color:co}},React.createElement("span",null,l+":"),React.createElement("span",{style:{fontSize:"15px"}},n));}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CSTA Math Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+    min-height: 100vh; color: #fff;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 20px;
+  }
+  .logo { font-family: 'Fredoka', sans-serif; font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 700; margin-bottom: 8px; }
+  .logo span { color: #F59E0B; }
+  .subtitle { color: #94A3B8; font-size: clamp(0.9rem, 2vw, 1.1rem); margin-bottom: 40px; text-align: center; }
+  .tools-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 24px; max-width: 900px; width: 100%;
+  }
+  .tool-card {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 32px 28px; text-decoration: none; color: #fff;
+    transition: all 0.3s ease; position: relative; overflow: hidden;
+  }
+  .tool-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+  .tool-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+  .tool-name { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
+  .tool-desc { color: #94A3B8; font-size: 0.9rem; line-height: 1.5; }
+  .tool-tag {
+    display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.75rem;
+    font-weight: 700; margin-top: 16px;
+  }
+  .tag-blue { background: rgba(59,130,246,0.2); color: #60A5FA; }
+  .tag-green { background: rgba(16,185,129,0.2); color: #34D399; }
+  .tag-amber { background: rgba(245,158,11,0.2); color: #FBBF24; }
+  .footer { margin-top: 60px; color: #475569; font-size: 0.8rem; text-align: center; }
+  .footer a { color: #60A5FA; text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="logo">CSTA <span>Math Tools</span></div>
+  <p class="subtitle">Interactive Mathematics Teaching Tools — Grade 7<br>Colegio de Sta. Teresa de Avila</p>
+
+  <div class="tools-grid">
+    <a href="chip-whiteboard.html" class="tool-card">
+      <span class="tool-icon">🔵🔴</span>
+      <div class="tool-name">Chip Whiteboard</div>
+      <p class="tool-desc">Interactive whiteboard for demonstrating addition and subtraction of integers using colored chips. Features drag-and-drop, trash bin, drawable rectangles for grouping, and auto zero-pair removal.</p>
+      <span class="tool-tag tag-blue">M7NS-Ic-d-1 · Integers</span>
+    </a>
+
+    <a href="integer-slides.html" class="tool-card">
+      <span class="tool-icon">📊</span>
+      <div class="tool-name">Lesson Slides</div>
+      <p class="tool-desc">Animated presentation slides for the Addition & Subtraction of Integers lesson. Navigate with arrow keys or swipe. Covers objectives, card game, chip model, rules, and quiz.</p>
+      <span class="tool-tag tag-green">Classroom Presentation</span>
+    </a>
+
+    <a href="#" class="tool-card" style="opacity:0.5; pointer-events:none;">
+      <span class="tool-icon">🎲</span>
+      <div class="tool-name">Integer War Game</div>
+      <p class="tool-desc">Digital version of the Integer War card game with scoreboard and timer. Coming soon!</p>
+      <span class="tool-tag tag-amber">Coming Soon</span>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>Built for TCE 1 — 21st Century Filipino Teacher</p>
+    <p style="margin-top:4px;">Erick Masanque · Bachelor of Education — Mathematics</p>
+    <p style="margin-top:8px;"><a href="https://github.com/erickmasanque/CSTAMathTools" target="_blank">View on GitHub</a></p>
+  </div>
+</body>
+</html>
