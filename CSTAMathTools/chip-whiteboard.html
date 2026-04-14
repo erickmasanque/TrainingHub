@@ -56,6 +56,7 @@ function App() {
   const [dRect, setDRect] = useState(null);
   const [flash, setFlash] = useState(false);
   const [showAns, setShowAns] = useState(false);
+  const [snap, setSnap] = useState({pos:0,neg:0});
 
   const bRef = useRef(null);
   const tRef = useRef(null);
@@ -66,14 +67,15 @@ function App() {
   const negN = ac.filter(c => c.value<0).length;
 
   const push = useCallback(() => {
-    setHist(h => [...h.slice(-30), {chips:[...chips], rects:[...rects]}]);
-  }, [chips, rects]);
+    setHist(h => [...h.slice(-30), {chips:[...chips], rects:[...rects], snap}]);
+  }, [chips, rects, snap]);
 
   const addChip = useCallback((v) => {
     const b = bRef.current; if(!b) return;
     const r = b.getBoundingClientRect(); const m=50;
     push();
     setChips(p => [...p, mkChip(v, m+Math.random()*(r.width-CHIP_SIZE-m*2), m+Math.random()*(r.height-CHIP_SIZE-m*2))]);
+    setSnap(s => v>0 ? {...s,pos:s.pos+1} : {...s,neg:s.neg+1});
   }, [push]);
 
   const addMult = useCallback((v,n) => {
@@ -87,20 +89,21 @@ function App() {
       nc.push(mkChip(v, bx+col*(CHIP_SIZE+10), m+row*(CHIP_SIZE+10)));
     }
     setChips(p => [...p,...nc]);
+    setSnap(s => v>0 ? {...s,pos:s.pos+n} : {...s,neg:s.neg+n});
   }, [push]);
 
   const rmChip = useCallback(id => { push(); setChips(p=>p.filter(c=>c.id!==id)); }, [push]);
 
   const clearAll = useCallback(() => {
     if(chips.length===0 && rects.length===0) return;
-    push(); setChips([]); setRects([]);
+    push(); setChips([]); setRects([]); setSnap({pos:0,neg:0});
   }, [chips,rects,push]);
 
   const undo = useCallback(() => {
     if(hist.length===0) return;
     const prev = hist[hist.length-1];
     setHist(h=>h.slice(0,-1));
-    setChips(prev.chips); setRects(prev.rects);
+    setChips(prev.chips); setRects(prev.rects); setSnap(prev.snap ?? {pos:0,neg:0});
   }, [hist]);
 
   const findZP = useCallback(() => {
@@ -145,6 +148,8 @@ function App() {
       if(ti<tokens.length-1) xC+=30;
     });
     setChips(p=>[...p,...nc]);
+    const sp=nc.filter(c=>c.value>0).length, sn=nc.filter(c=>c.value<0).length;
+    setSnap(s=>({pos:s.pos+sp,neg:s.neg+sn}));
   }, [expr, push]);
 
   // Chip drag
@@ -260,7 +265,6 @@ function App() {
         React.createElement("div",{style:{marginLeft:"auto",display:"flex",alignItems:"center",gap:"8px"}},
           badge("Blue",posN,C.pos,C.posLt),
           badge("Red",negN,C.neg,C.negLt),
-          React.createElement("div",{style:{padding:"4px 16px",borderRadius:10,background:total===0?"#F1F5F9":total>0?C.posLt:C.negLt,border:"2px solid "+(total===0?C.mid:total>0?C.pos:C.neg),fontWeight:800,fontSize:"20px",fontFamily:"'Fredoka','Nunito',sans-serif",color:total===0?C.mid:total>0?C.pos:C.neg,minWidth:60,textAlign:"center",transition:"all 0.3s"}},fmt(total)),
         ),
       ),
 
@@ -270,7 +274,7 @@ function App() {
         ac.length>0&&React.createElement("div",{style:{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 12px",background:showAns?(total>0?C.posLt:total<0?C.negLt:"#F1F5F9"):"#F8FAFC",borderBottom:"2px solid "+(showAns?(total>0?C.pos:total<0?C.neg:C.mid):"#CBD5E1")}},
           React.createElement("div",{style:{flex:1}}),
           React.createElement("div",{style:{display:"flex",alignItems:"center",flexWrap:"wrap",gap:2,fontFamily:"'Fredoka','Nunito',sans-serif",fontWeight:700,fontSize:"clamp(22px,3.5vw,38px)",lineHeight:1.1,letterSpacing:"0.5px"}},
-            renderEqParts(expr,posN,negN,showAns?total:null,C)
+            renderEqParts(expr,snap.pos,snap.neg,showAns?total:null,C)
           ),
           React.createElement("div",{style:{flex:1,display:"flex",justifyContent:"flex-end"}},
             React.createElement("button",{onClick:()=>setShowAns(a=>!a),style:{padding:"5px 14px",borderRadius:20,border:"2px solid "+(showAns?"#CBD5E1":C.green),background:showAns?"transparent":C.green,color:showAns?C.mid:"#fff",fontFamily:"inherit",fontWeight:700,fontSize:"12px",cursor:"pointer",transition:"all 0.2s"}},showAns?"Hide":"👁 Show Answer"),
