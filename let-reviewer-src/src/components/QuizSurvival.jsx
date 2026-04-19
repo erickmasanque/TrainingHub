@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getEndlessQuestions } from '../services/db';
 import BubbleSheet from './BubbleSheet';
+import ReportButton from './ReportButton';
+import { playClick, playCorrect, playWrong, playTimeout, playGameOver, playLifeGained, playStreak, playTimerTick } from '../services/sounds';
 
 const SECONDS_PER_QUESTION = 30;
 const LIFE_MILESTONES = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95];
 
-export default function QuizSurvival({ cluster, onBack, onComplete }) {
+export default function QuizSurvival({ cluster, onBack, onComplete, userId = null }) {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState('');
@@ -56,12 +58,14 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
   }, [loading, questions.length, gameOver, showFeedback, currentIndex]);
 
   const handleTimeout = useCallback(() => {
+    playTimeout();
     const newLives = lives - 1;
     setLives(newLives);
     setCorrectStreak(0);
     setTotalAnswered(prev => prev + 1);
 
     if (newLives <= 0) {
+      playGameOver();
       setGameOver(true);
       return;
     }
@@ -87,6 +91,7 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
 
   const handleSubmit = () => {
     if (!selectedAnswer || showFeedback) return;
+    playClick();
 
     const currentQ = questions[currentIndex];
     const isCorrect = selectedAnswer === currentQ.correctAnswer;
@@ -97,6 +102,7 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
     setTotalAnswered(newTotalAnswered);
 
     if (isCorrect) {
+      playCorrect();
       const newCorrect = totalCorrect + 1;
       const newStreak = correctStreak + 1;
       setTotalCorrect(newCorrect);
@@ -104,7 +110,13 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
 
       // Check for life milestone
       if (LIFE_MILESTONES.includes(newTotalAnswered)) {
+        playLifeGained();
         setLives(prev => prev + 1);
+      }
+
+      // Streak milestone every 5
+      if (newStreak > 0 && newStreak % 5 === 0) {
+        playStreak();
       }
 
       setShowFeedback('correct');
@@ -113,6 +125,7 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
         advanceQuestion();
       }, 800);
     } else {
+      playWrong();
       const newLives = lives - 1;
       setLives(newLives);
       setCorrectStreak(0);
@@ -121,6 +134,7 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
         setShowFeedback('wrong');
         feedbackTimeoutRef.current = setTimeout(() => {
           setShowFeedback(null);
+          playGameOver();
           setGameOver(true);
         }, 1200);
       } else {
@@ -219,7 +233,7 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
       {/* Question timer progress bar */}
       <div className="question-timer-bg">
         <div
-          className={`question-timer-fill ${timerDanger ? 'danger' : ''}`}
+          className={`question-timer-fill ${timerPercent <= 20 ? 'timer-bar-red' : timerPercent <= 40 ? 'timer-bar-orange' : 'timer-bar-green'}`}
           style={{ width: `${timerPercent}%` }}
         />
       </div>
@@ -245,7 +259,8 @@ export default function QuizSurvival({ cluster, onBack, onComplete }) {
           <p className="text-error bold" style={{ marginTop: '1rem', textAlign: 'center' }}>❌ Wrong! Answer: {currentQ.correctAnswer}</p>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
+          <ReportButton questionId={currentQ.id} uid={userId} />
           <button
             onClick={handleSubmit}
             className="btn-primary"

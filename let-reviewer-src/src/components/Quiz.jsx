@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getQuestionsByCluster, generateMockExam, getDailyChallengeQuestions, getHardestQuestions } from '../services/db';
 import BubbleSheet from './BubbleSheet';
+import ReportButton from './ReportButton';
+import { playClick, playNext, playFinish, playTimerTick } from '../services/sounds';
 
 export default function Quiz({ 
   cluster, onBack, onComplete, itemCount = 20, 
   isMock = false, isDailyChallenge = false,
-  isHardMode = false, timedMinutes = null 
+  isHardMode = false, timedMinutes = null,
+  userId = null
 }) {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,7 +19,8 @@ export default function Quiz({
   // Timer state
   const mockTimeLimit = isMock ? (itemCount === 150 ? 7200 : 3600) : null;
   const shortTimeLimit = timedMinutes ? timedMinutes * 60 : null;
-  const [timeLeft, setTimeLeft] = useState(mockTimeLimit || shortTimeLimit);
+  const initialTimeLimit = mockTimeLimit || shortTimeLimit;
+  const [timeLeft, setTimeLeft] = useState(initialTimeLimit);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
@@ -29,7 +33,6 @@ export default function Quiz({
           q = await generateMockExam(itemCount);
         } else if (isHardMode) {
           q = await getHardestQuestions(cluster, itemCount);
-          // If not enough hard questions, fall back to random
           if (q.length < itemCount) {
             const extra = await getQuestionsByCluster(cluster);
             const extraShuffled = extra.sort(() => Math.random() - 0.5);
@@ -62,7 +65,7 @@ export default function Quiz({
 
     const timerId = setInterval(() => {
       setElapsedTime(prev => prev + 1);
-      if (timeLeft !== null) {
+      if (initialTimeLimit !== null) {
         setTimeLeft(prev => {
           if (prev !== null && prev <= 1) return 0;
           return prev !== null ? prev - 1 : null;
@@ -82,14 +85,17 @@ export default function Quiz({
 
   const handleNext = () => {
     if (!selectedAnswer) return;
+    playClick();
     
     const newAnswers = { ...answers, [questions[currentIndex].id]: selectedAnswer };
     setAnswers(newAnswers);
     setSelectedAnswer('');
 
     if (currentIndex < questions.length - 1) {
+      playNext();
       setCurrentIndex(currentIndex + 1);
     } else {
+      playFinish();
       onComplete(questions, newAnswers, elapsedTime);
     }
   };
@@ -112,14 +118,23 @@ export default function Quiz({
     return cluster;
   };
 
+  // Progress bar color logic
+  const getTimerBarClass = () => {
+    if (initialTimeLimit === null || timeLeft === null) return '';
+    const percent = timeLeft / initialTimeLimit;
+    if (percent <= 0.2) return 'timer-bar-red';
+    if (percent <= 0.4) return 'timer-bar-orange';
+    return 'timer-bar-green';
+  };
+
   if (loading) return <div className="container" style={{textAlign: 'center'}}>Loading questions...</div>;
   if (questions.length === 0) return <div className="container">No questions found for {cluster}. <button onClick={onBack} className="btn-primary">Back</button></div>;
 
   const currentQ = questions[currentIndex];
   if (!currentQ) return <div className="container">Error loading question data! <button onClick={onBack} className="btn-primary">Back</button></div>;
 
-  const hasCountdown = timeLeft !== null;
-  const isWarning = hasCountdown && timeLeft < 60;
+  const hasCountdown = timeLeft !== null && initialTimeLimit !== null;
+  const timerPercent = hasCountdown ? (timeLeft / initialTimeLimit) * 100 : 0;
 
   return (
     <div className="container">
@@ -130,7 +145,7 @@ export default function Quiz({
         </div>
         <div className="align-items-center">
           {hasCountdown && (
-            <div className={`timer-badge ${isWarning ? 'warning' : ''}`}>
+            <div className={`timer-badge ${timeLeft < 60 ? 'warning' : ''}`}>
               ⏱️ {formatTime(timeLeft)}
             </div>
           )}
@@ -143,6 +158,16 @@ export default function Quiz({
         </div>
       </header>
 
+      {/* Countdown progress bar */}
+      {hasCountdown && (
+        <div className="countdown-bar-bg">
+          <div
+            className={`countdown-bar-fill ${getTimerBarClass()}`}
+            style={{ width: `${timerPercent}%` }}
+          />
+        </div>
+      )}
+
       <div className="paper-card">
         <h3 className="section-title">{currentQ.questionText}</h3>
         <BubbleSheet 
@@ -151,7 +176,8 @@ export default function Quiz({
           onSelect={setSelectedAnswer} 
         />
         
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
+          <ReportButton questionId={currentQ.id} uid={userId} />
           <button onClick={handleNext} className="btn-primary" disabled={!selectedAnswer}>
             {currentIndex === questions.length - 1 ? 'Finish' : 'Next'}
           </button>

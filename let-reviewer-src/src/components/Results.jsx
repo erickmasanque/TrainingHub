@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { updateUserXP, recordUserActivity, recordQuestionStats } from '../services/db';
+import { updateUserXP, recordUserActivity, recordQuestionStats, saveAttempt, submitLeaderboardEntry } from '../services/db';
+import { getLevel, getLevelProgress } from '../services/levels';
 
-export default function Results({ questions, answers, time, user, onBack, onCompleteUpdate }) {
+export default function Results({ questions, answers, time, user, onBack, onCompleteUpdate, mode, cluster }) {
   const [xpEarned, setXpEarned] = useState(0);
   const [newStreak, setNewStreak] = useState(user?.streak || 0);
   const updatedRef = useRef(false);
@@ -35,8 +36,32 @@ export default function Results({ questions, answers, time, user, onBack, onComp
       }).catch(err =>
         console.error("Failed to record user activity:", err)
       );
+
+      // Save attempt to history
+      saveAttempt(user.uid, {
+        mode: mode || 'practice',
+        cluster: cluster || 'General',
+        totalQuestions: questions.length,
+        correctAnswers: correctAnswersCount,
+        score: Math.round((correctAnswersCount / questions.length) * 100),
+        timeSpentSeconds: timeSpent,
+        xpEarned: earned
+      }).catch(err =>
+        console.error("Failed to save attempt:", err)
+      );
+
+      // Submit to leaderboard
+      const scorePercent = Math.round((correctAnswersCount / questions.length) * 100);
+      const displayName = user.nickname || user.name || 'Anonymous';
+      submitLeaderboardEntry(
+        user.uid, displayName, user.xp + earned, mode || 'practice',
+        scorePercent, timeSpent, questions.length, correctAnswersCount,
+        cluster || ''
+      ).catch(err =>
+        console.error("Failed to submit leaderboard:", err)
+      );
     }
-  }, [correctAnswersCount, user, onCompleteUpdate, answers, questions, time]);
+  }, [correctAnswersCount, user, onCompleteUpdate, answers, questions, time, mode, cluster]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);

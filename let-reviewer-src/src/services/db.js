@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, writeBatch, increment, orderBy, limit as firestoreLimit } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, query, where, writeBatch, increment, orderBy, limit as firestoreLimit } from "firebase/firestore";
 import { db } from "../firebase";
 
 // USER PROFILES
@@ -104,6 +104,145 @@ export async function recordLogin(uid) {
   const analytics = data.analytics || { totalLogins: 0, lastActiveDate: null };
   analytics.totalLogins += 1;
   await updateDoc(userRef, { analytics });
+}
+
+// ATTEMPT HISTORY
+export async function saveAttempt(uid, attemptData) {
+  const attemptsRef = collection(db, "users", uid, "attempts");
+  await addDoc(attemptsRef, {
+    ...attemptData,
+    createdAt: new Date().toISOString()
+  });
+}
+
+export async function getAttemptHistory(uid) {
+  const attemptsRef = collection(db, "users", uid, "attempts");
+  const q = query(attemptsRef, orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+  const attempts = [];
+  snapshot.forEach(doc => attempts.push({ id: doc.id, ...doc.data() }));
+  return attempts;
+}
+
+// QUESTION REPORTS
+export async function reportQuestion(questionId, uid, reason) {
+  const reportsRef = collection(db, "reports");
+  await addDoc(reportsRef, {
+    questionId,
+    reportedBy: uid,
+    reason,
+    createdAt: new Date().toISOString(),
+    status: 'pending'
+  });
+}
+
+// LEADERBOARD
+// Submit or update a leaderboard entry (keeps best score only)
+export async function submitLeaderboardEntry(uid, nickname, xp, mode, score, timeSpentSeconds, totalQuestions, correctAnswers, cluster = '') {
+  const today = new Date().toISOString().split('T')[0];
+  const clusterSlug = cluster ? `_${cluster.replace(/[^a-zA-Z]/g, '')}` : '';
+  
+  // For daily challenge, key by date so each day has its own leaderboard
+  // For category modes (survival, short, hard, sandbox), include cluster in key
+  let docId;
+  if (mode === 'daily') {
+    docId = `${mode}_${today}_${uid}`;
+  } else if (mode === 'mock') {
+    docId = `${mode}_${uid}`;
+  } else {
+    // survival, short, hard, sandbox — per cluster per user
+    docId = `${mode}${clusterSlug}_${uid}`;
+  }
+  
+  const entryRef = doc(db, "leaderboard", docId);
+  const existing = await getDoc(entryRef);
+  
+  // For daily: only one attempt allowed (never overwrite)
+  if (mode === 'daily' && existing.exists()) {
+    return; // Already completed today's daily
+  }
+  
+  // For other modes: only update if this is a better score (or first entry)
+  if (!existing.exists() || score > existing.data().score || 
+      (score === existing.data().score && timeSpentSeconds < existing.data().timeSpentSeconds)) {
+    await setDoc(entryRef, {
+      uid,
+      nickname: nickname || 'Anonymous',
+      xp: xp || 0,
+      mode,
+      cluster: cluster || '',
+      score,
+      timeSpentSeconds,
+      totalQuestions,
+      correctAnswers,
+      date: today,
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+}
+
+// Check if user has already completed today's daily challenge
+export async function hasDoneDailyChallenge(uid) {
+  const today = new Date().toISOString().split('T')[0];
+  const docId = `daily_${today}_${uid}`;
+  const entryRef = doc(db, "leaderboard", docId);
+  const snap = await getDoc(entryRef);
+  if (snap.exists()) {
+    return snap.data(); // Return their result
+  }
+  return null;
+}
+
+// Get leaderboard entries for a specific mode, optionally filtered by date and cluster
+// Uses simple single-field query + client-side sort to avoid composite index requirement
+export async function getLeaderboard(mode, limitAmount = 10, todayOnly = false, cluster = '') {
+  const q = query(
+    collection(db, "leaderboard"),
+    where("mode", "==", mode)
+  );
+  
+  const snapshot = await getDocs(q);
+  let entries = [];
+  snapshot.forEach(d => entries.push({ id: d.id, ...d.data() }));
+  
+  // Client-side date filtering
+  if (todayOnly) {
+    const today = new Date().toISOString().split('T')[0];
+    entries = entries.filter(e => e.date === today);
+  }
+  
+  // Client-side cluster filtering
+  if (cluster) {
+    entries = entries.filter(e => e.cluster === cluster);
+  }
+  
+  // Client-side sort:
+  // 1st: score % (higher is better)
+  // 2nd: time elapsed (lower/faster is better)
+  // 3rd: submission time (earlier is better — who answered first)
+  entries.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if ((a.timeSpentSeconds || 0) !== (b.timeSpentSeconds || 0)) {
+      return (a.timeSpentSeconds || 0) - (b.timeSpentSeconds || 0);
+    }
+    return (a.submittedAt || '').localeCompare(b.submittedAt || '');
+  });
+  
+  return entries.slice(0, limitAmount);
+}
+
+// Get top users by XP (overall leaderboard)
+export async function getXPLeaderboard(limitAmount = 10) {
+  const q = query(
+    collection(db, "users"),
+    orderBy("xp", "desc"),
+    firestoreLimit(limitAmount)
+  );
+  const snapshot = await getDocs(q);
+  const entries = [];
+  snapshot.forEach(d => entries.push({ id: d.id, ...d.data() }));
+  return entries;
 }
 
 // QUESTIONS
@@ -241,13 +380,67 @@ export async function getDailyChallengeQuestions(limit = 7) {
   const seed = getDailySeed();
   const random = mulberry32(seed);
 
-  // Seeded shuffle algorithm (Fisher-Yates)
-  for (let i = allQs.length - 1; i > 0; i--) {
+  // Group questions by cluster
+  const clusters = {};
+  allQs.forEach(q => {
+    const cluster = q.cluster || 'General';
+    if (!clusters[cluster]) clusters[cluster] = [];
+    clusters[cluster].push(q);
+  });
+
+  // Seeded shuffle each cluster independently
+  Object.values(clusters).forEach(arr => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  });
+
+  // Distribute evenly: round-robin from each cluster
+  const clusterKeys = Object.keys(clusters);
+  // Shuffle cluster order with seed too so it's not always alphabetical
+  for (let i = clusterKeys.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
-    [allQs[i], allQs[j]] = [allQs[j], allQs[i]];
+    [clusterKeys[i], clusterKeys[j]] = [clusterKeys[j], clusterKeys[i]];
   }
 
-  return allQs.slice(0, limit);
+  const perCluster = Math.floor(limit / clusterKeys.length);
+  const remainder = limit % clusterKeys.length;
+
+  const selected = [];
+  const usedIds = new Set();
+
+  // Take perCluster from each, +1 for the first 'remainder' clusters
+  clusterKeys.forEach((key, idx) => {
+    const take = perCluster + (idx < remainder ? 1 : 0);
+    const pool = clusters[key];
+    for (let i = 0; i < Math.min(take, pool.length); i++) {
+      selected.push(pool[i]);
+      usedIds.add(pool[i].id);
+    }
+  });
+
+  // If any cluster didn't have enough, fill from remaining questions across all clusters
+  if (selected.length < limit) {
+    const leftover = allQs.filter(q => !usedIds.has(q.id));
+    // Seeded shuffle the leftover
+    for (let i = leftover.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [leftover[i], leftover[j]] = [leftover[j], leftover[i]];
+    }
+    for (const q of leftover) {
+      if (selected.length >= limit) break;
+      selected.push(q);
+    }
+  }
+
+  // Final seeded shuffle so questions aren't grouped by cluster
+  for (let i = selected.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [selected[i], selected[j]] = [selected[j], selected[i]];
+  }
+
+  return selected.slice(0, limit);
 }
 
 // SEEDING UTILITY

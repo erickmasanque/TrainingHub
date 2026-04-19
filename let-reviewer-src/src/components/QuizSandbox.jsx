@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getEndlessQuestions } from '../services/db';
 import BubbleSheet from './BubbleSheet';
+import ReportButton from './ReportButton';
+import { playClick, playCorrect, playWrong, playFinish } from '../services/sounds';
 
-export default function QuizSandbox({ cluster, onBack, onComplete }) {
+export default function QuizSandbox({ cluster, onBack, onComplete, userId = null }) {
   const [queue, setQueue] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState('');
@@ -47,6 +49,7 @@ export default function QuizSandbox({ cluster, onBack, onComplete }) {
 
   const handleSubmit = useCallback(() => {
     if (!selectedAnswer || showFeedback) return;
+    playClick();
 
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
     const newAnswers = { ...answers, [currentQuestion.id]: selectedAnswer };
@@ -54,18 +57,18 @@ export default function QuizSandbox({ cluster, onBack, onComplete }) {
     setTotalAnswered(prev => prev + 1);
 
     if (isCorrect) {
+      playCorrect();
       setTotalCorrect(prev => prev + 1);
       setMasteredCount(prev => prev + 1);
       setShowFeedback('correct');
 
       setTimeout(() => {
         setShowFeedback(null);
-        // Remove from queue and advance
         const newQueue = [...queue];
-        newQueue.shift(); // remove current
+        newQueue.shift();
 
         if (newQueue.length === 0) {
-          // All questions mastered!
+          playFinish();
           onComplete(
             Object.keys(newAnswers).map(id => queue.find(q => q.id === id) || currentQuestion),
             newAnswers,
@@ -79,17 +82,17 @@ export default function QuizSandbox({ cluster, onBack, onComplete }) {
         setSelectedAnswer('');
       }, 800);
     } else {
+      playWrong();
       setShowFeedback('wrong');
 
       setTimeout(() => {
         setShowFeedback(null);
-        // Re-inject the failed question 2-4 positions later
         const newQueue = [...queue];
-        newQueue.shift(); // remove from front
+        newQueue.shift();
 
         const reinjectPos = Math.min(
           newQueue.length,
-          Math.floor(Math.random() * 3) + 2 // 2, 3, or 4 positions later
+          Math.floor(Math.random() * 3) + 2
         );
         newQueue.splice(reinjectPos, 0, currentQuestion);
 
@@ -165,10 +168,13 @@ export default function QuizSandbox({ cluster, onBack, onComplete }) {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
-          <button onClick={handleFinishEarly} className="btn-light">
-            Finish Early
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button onClick={handleFinishEarly} className="btn-light btn-small">
+              Finish Early
+            </button>
+            <ReportButton questionId={currentQuestion?.id} uid={userId} />
+          </div>
           <button
             onClick={handleSubmit}
             className="btn-primary"
