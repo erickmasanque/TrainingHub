@@ -28,9 +28,9 @@ export default defineConfig({
       }
     })
   ],
-  base: '/TrainingHub/let-reviewer-web/',
+  base: '/TrainingHub/',
   build: {
-    outDir: '../let-reviewer-web',
+    outDir: 'dist',
     emptyOutDir: true,
   }
 })

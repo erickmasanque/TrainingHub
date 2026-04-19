@@ -32,7 +32,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter base="/TrainingHub/let-reviewer-web/">
+    <BrowserRouter basename="/TrainingHub/">
       <Routes>
         <Route path="/" element={
           !user ? <Landing onLogin={(u) => { /* Let onAuthStateChanged handle it */ }} /> : 
