@@ -121,7 +121,7 @@ export default function Dashboard({ user, setUser }) {
 
         </div>
       </div>
-      <Seeder />
+      {user.email === 'erickmasanque@gmail.com' && <Seeder />}
     </div>
   );
 }
