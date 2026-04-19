@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, writeBatch } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, writeBatch, increment, orderBy, limit as firestoreLimit } from "firebase/firestore";
 import { db } from "../firebase";
 
 // USER PROFILES
@@ -17,7 +17,14 @@ export async function getUserProfile(uid, email, displayName) {
       major: null, // "BEED" or "BSED"
       streak: 0,
       xp: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      analytics: {
+        totalLogins: 1,
+        totalQuizzesCompleted: 0,
+        totalQuestionsAnswered: 0,
+        totalTimeSpentSeconds: 0,
+        lastActiveDate: new Date().toISOString()
+      }
     };
     await setDoc(userRef, newUser);
     return newUser;
@@ -46,6 +53,59 @@ export async function updateUserXP(uid, xpToAdd) {
   return 0;
 }
 
+export async function recordUserActivity(uid, questionsAnswered, timeSpentSeconds) {
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) return;
+  
+  const data = userSnap.data();
+  const analytics = data.analytics || {
+    totalLogins: 1, totalQuizzesCompleted: 0, totalQuestionsAnswered: 0, totalTimeSpentSeconds: 0, lastActiveDate: null
+  };
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  let newStreak = data.streak || 0;
+  
+  if (analytics.lastActiveDate) {
+    const lastDate = new Date(analytics.lastActiveDate);
+    const lastActiveDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+    const diffTime = Math.abs(today - lastActiveDay);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+      newStreak += 1;
+    } else if (diffDays > 1) {
+      newStreak = 1;
+    }
+  } else {
+    newStreak = 1; // First active day
+  }
+
+  analytics.totalQuizzesCompleted += 1;
+  analytics.totalQuestionsAnswered += questionsAnswered;
+  analytics.totalTimeSpentSeconds += timeSpentSeconds;
+  analytics.lastActiveDate = now.toISOString();
+
+  await updateDoc(userRef, { 
+    streak: newStreak,
+    analytics 
+  });
+  
+  return newStreak;
+}
+
+export async function recordLogin(uid) {
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) return;
+  const data = userSnap.data();
+  const analytics = data.analytics || { totalLogins: 0, lastActiveDate: null };
+  analytics.totalLogins += 1;
+  await updateDoc(userRef, { analytics });
+}
+
 // QUESTIONS
 export async function getQuestionsByCluster(cluster) {
   const q = query(collection(db, "questions"), where("cluster", "==", cluster));
@@ -55,6 +115,40 @@ export async function getQuestionsByCluster(cluster) {
     questions.push({ id: doc.id, ...doc.data() });
   });
   return questions;
+}
+
+export async function getEndlessQuestions(cluster) {
+  // Same as getQuestionsByCluster, but expected to be deeply randomized by the caller
+  const questions = await getQuestionsByCluster(cluster);
+  return questions.sort(() => Math.random() - 0.5);
+}
+
+export async function getHardestQuestions(cluster, limitAmount = 20) {
+  const questions = await getQuestionsByCluster(cluster);
+  // Calculate accuracy: timesCorrectFirstTry / timesAttempted
+  const withAccuracy = questions.filter(q => q.timesAttempted > 0).map(q => ({
+    ...q,
+    accuracy: q.timesCorrectFirstTry / q.timesAttempted
+  }));
+  
+  // Sort by lowest accuracy
+  withAccuracy.sort((a, b) => a.accuracy - b.accuracy);
+  
+  return withAccuracy.slice(0, limitAmount);
+}
+
+export async function recordQuestionStats(answersMap, questionsArray) {
+  const batch = writeBatch(db);
+  for (const q of questionsArray) {
+    if (!answersMap[q.id]) continue; // Skip if user didn't answer it
+    const isCorrect = answersMap[q.id] === q.correctAnswer;
+    const qRef = doc(db, "questions", q.id);
+    batch.update(qRef, {
+      timesAttempted: increment(1),
+      timesCorrectFirstTry: isCorrect ? increment(1) : increment(0)
+    });
+  }
+  await batch.commit();
 }
 
 const QUOTAS_150 = {

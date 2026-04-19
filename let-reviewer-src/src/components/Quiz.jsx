@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { getQuestionsByCluster, generateMockExam, getDailyChallengeQuestions } from '../services/db';
+import { getQuestionsByCluster, generateMockExam, getDailyChallengeQuestions, getHardestQuestions } from '../services/db';
 import BubbleSheet from './BubbleSheet';
 
-export default function Quiz({ cluster, onBack, onComplete, itemCount = 20, isMock = false, isDailyChallenge = false }) {
+export default function Quiz({ 
+  cluster, onBack, onComplete, itemCount = 20, 
+  isMock = false, isDailyChallenge = false,
+  isHardMode = false, timedMinutes = null 
+}) {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState('');
@@ -10,7 +14,9 @@ export default function Quiz({ cluster, onBack, onComplete, itemCount = 20, isMo
   const [loading, setLoading] = useState(true);
   
   // Timer state
-  const [timeLeft, setTimeLeft] = useState(isMock ? (itemCount === 150 ? 7200 : 3600) : null);
+  const mockTimeLimit = isMock ? (itemCount === 150 ? 7200 : 3600) : null;
+  const shortTimeLimit = timedMinutes ? timedMinutes * 60 : null;
+  const [timeLeft, setTimeLeft] = useState(mockTimeLimit || shortTimeLimit);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
@@ -21,6 +27,20 @@ export default function Quiz({ cluster, onBack, onComplete, itemCount = 20, isMo
           q = await getDailyChallengeQuestions(itemCount);
         } else if (isMock) {
           q = await generateMockExam(itemCount);
+        } else if (isHardMode) {
+          q = await getHardestQuestions(cluster, itemCount);
+          // If not enough hard questions, fall back to random
+          if (q.length < itemCount) {
+            const extra = await getQuestionsByCluster(cluster);
+            const extraShuffled = extra.sort(() => Math.random() - 0.5);
+            const existingIds = new Set(q.map(x => x.id));
+            for (const eq of extraShuffled) {
+              if (!existingIds.has(eq.id)) {
+                q.push(eq);
+                if (q.length >= itemCount) break;
+              }
+            }
+          }
         } else {
           q = await getQuestionsByCluster(cluster);
           q = q.sort(() => Math.random() - 0.5).slice(0, itemCount);
@@ -34,26 +54,31 @@ export default function Quiz({ cluster, onBack, onComplete, itemCount = 20, isMo
       }
     }
     load();
-  }, [cluster, itemCount, isMock, isDailyChallenge]);
+  }, [cluster, itemCount, isMock, isDailyChallenge, isHardMode]);
 
   // Timer logic
   useEffect(() => {
     if (loading || questions.length === 0) return;
-    
-    if (isMock && timeLeft !== null && timeLeft <= 0) {
-      onComplete(questions, answers, elapsedTime);
-      return;
-    }
 
     const timerId = setInterval(() => {
       setElapsedTime(prev => prev + 1);
-      if (isMock && timeLeft !== null && timeLeft > 0) {
-        setTimeLeft(prev => prev - 1);
+      if (timeLeft !== null) {
+        setTimeLeft(prev => {
+          if (prev !== null && prev <= 1) return 0;
+          return prev !== null ? prev - 1 : null;
+        });
       }
     }, 1000);
 
     return () => clearInterval(timerId);
-  }, [isMock, loading, questions.length, timeLeft, onComplete, answers, questions, elapsedTime]);
+  }, [loading, questions.length]);
+
+  // Auto-submit when countdown timer runs out
+  useEffect(() => {
+    if (timeLeft !== null && timeLeft <= 0 && questions.length > 0) {
+      onComplete(questions, answers, elapsedTime);
+    }
+  }, [timeLeft]);
 
   const handleNext = () => {
     if (!selectedAnswer) return;
@@ -79,23 +104,32 @@ export default function Quiz({ cluster, onBack, onComplete, itemCount = 20, isMo
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const getModeLabel = () => {
+    if (isDailyChallenge) return 'Global Daily Challenge';
+    if (isMock) return `Mock Exam: ${cluster}`;
+    if (isHardMode) return `🔥 Hard Challenge: ${cluster}`;
+    if (timedMinutes) return `⚡ Short Challenge: ${cluster}`;
+    return cluster;
+  };
+
   if (loading) return <div className="container" style={{textAlign: 'center'}}>Loading questions...</div>;
   if (questions.length === 0) return <div className="container">No questions found for {cluster}. <button onClick={onBack} className="btn-primary">Back</button></div>;
 
   const currentQ = questions[currentIndex];
   if (!currentQ) return <div className="container">Error loading question data! <button onClick={onBack} className="btn-primary">Back</button></div>;
 
-  const isWarning = isMock && timeLeft !== null && timeLeft < 300;
+  const hasCountdown = timeLeft !== null;
+  const isWarning = hasCountdown && timeLeft < 60;
 
   return (
     <div className="container">
       <header className="app-header">
         <div>
-          <h2 className="app-title">{isDailyChallenge ? 'Global Daily Challenge' : (isMock ? `Mock Exam: ${cluster}` : cluster)}</h2>
+          <h2 className="app-title">{getModeLabel()}</h2>
           <p className="subtitle bold">Question {currentIndex + 1} of {questions.length}</p>
         </div>
         <div className="align-items-center">
-          {isMock && (
+          {hasCountdown && (
             <div className={`timer-badge ${isWarning ? 'warning' : ''}`}>
               ⏱️ {formatTime(timeLeft)}
             </div>

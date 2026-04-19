@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { updateUserXP } from '../services/db';
+import { updateUserXP, recordUserActivity, recordQuestionStats } from '../services/db';
 
 export default function Results({ questions, answers, time, user, onBack, onCompleteUpdate }) {
   const [xpEarned, setXpEarned] = useState(0);
+  const [newStreak, setNewStreak] = useState(user?.streak || 0);
   const updatedRef = useRef(false);
 
   const correctAnswersCount = questions.reduce((acc, q) => {
@@ -14,13 +15,28 @@ export default function Results({ questions, answers, time, user, onBack, onComp
       updatedRef.current = true;
       const earned = correctAnswersCount * 10; // 10 XP per correct answer
       setXpEarned(earned);
+
+      // Update XP
       updateUserXP(user.uid, earned).then(newXp => {
         if (onCompleteUpdate) {
           onCompleteUpdate(newXp);
         }
       });
+
+      // Record global question stats (timesAttempted, timesCorrectFirstTry)
+      recordQuestionStats(answers, questions).catch(err =>
+        console.error("Failed to record question stats:", err)
+      );
+
+      // Record user activity (streak, hidden analytics)
+      const timeSpent = time || 0;
+      recordUserActivity(user.uid, questions.length, timeSpent).then(streak => {
+        if (streak !== undefined) setNewStreak(streak);
+      }).catch(err =>
+        console.error("Failed to record user activity:", err)
+      );
     }
-  }, [correctAnswersCount, user, onCompleteUpdate]);
+  }, [correctAnswersCount, user, onCompleteUpdate, answers, questions, time]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);

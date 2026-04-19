@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { getUserProfile } from './services/db';
+import { getUserProfile, recordLogin } from './services/db';
 import Landing from './components/Landing';
 import Dashboard from './components/Dashboard';
 import Onboarding from './components/Onboarding';
@@ -17,6 +17,7 @@ function App() {
       if (authUser) {
         const profile = await getUserProfile(authUser.uid, authUser.email, authUser.displayName);
         setUser(profile);
+        await recordLogin(authUser.uid);
       } else {
         setUser(null);
       }
