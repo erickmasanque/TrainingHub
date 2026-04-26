@@ -509,3 +509,65 @@ export async function seedQuestionsFromCSVText(csvText) {
   await batch.commit();
   return count;
 }
+
+// RAFFLE POINTS
+export async function getUserRafflePoints(uid) {
+  let points = 0;
+  
+  try {
+    // 1. Overall XP Top 10
+    const xpLb = await getXPLeaderboard(10);
+    if (xpLb.some(e => e.uid === uid)) points += 1;
+    
+    // 2. Mock Exam Top 10
+    const mockLb = await getLeaderboard('mock', 10, false, '');
+    if (mockLb.some(e => e.uid === uid)) points += 1;
+    
+    // 3. Modes + Clusters Top 10
+    const modes = ['survival', 'short', 'hard', 'sandbox'];
+    const clusters = ['Intellectual Competencies', 'Personal & Civic Responsibilities', 'Practical Skills Development'];
+    
+    // Since getLeaderboard requires mode and cluster, we can do these in parallel
+    const promises = [];
+    for (const mode of modes) {
+      for (const cluster of clusters) {
+        promises.push(getLeaderboard(mode, 10, false, cluster));
+      }
+    }
+    const allLbs = await Promise.all(promises);
+    for (const lb of allLbs) {
+      if (lb.some(e => e.uid === uid)) points += 1;
+    }
+    
+    // 4. Daily Leaderboards
+    const qDaily = query(collection(db, "leaderboard"), where("uid", "==", uid), where("mode", "==", "daily"));
+    const dailySnap = await getDocs(qDaily);
+    const dailyDates = [];
+    dailySnap.forEach(d => dailyDates.push(d.data().date));
+    
+    for (const date of dailyDates) {
+      const qDay = query(collection(db, "leaderboard"), where("mode", "==", "daily"), where("date", "==", date));
+      const daySnap = await getDocs(qDay);
+      const dayEntries = [];
+      daySnap.forEach(d => dayEntries.push(d.data()));
+      
+      dayEntries.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if ((a.timeSpentSeconds || 0) !== (b.timeSpentSeconds || 0)) {
+          return (a.timeSpentSeconds || 0) - (b.timeSpentSeconds || 0);
+        }
+        return (a.submittedAt || '').localeCompare(b.submittedAt || '');
+      });
+      
+      const rank = dayEntries.findIndex(e => e.uid === uid);
+      if (rank !== -1) {
+        if (rank < 10) points += 1; // 1 point for being in top 10 daily leaderboard
+        if (rank < 3) points += 1;  // +1 permanent for top 3
+      }
+    }
+  } catch (err) {
+    console.error("Error calculating raffle points:", err);
+  }
+  
+  return points;
+}

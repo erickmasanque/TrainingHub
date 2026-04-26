@@ -12,7 +12,7 @@ import AttemptHistory from './AttemptHistory';
 import Leaderboard from './Leaderboard';
 import MiniLeaderboard from './MiniLeaderboard';
 import { getLevel, getLevelProgress, xpToNextLevel } from '../services/levels';
-import { hasDoneDailyChallenge } from '../services/db';
+import { hasDoneDailyChallenge, getUserRafflePoints } from '../services/db';
 
 export default function Dashboard({ user, setUser }) {
   const [activeCluster, setActiveCluster] = useState(null);
@@ -26,13 +26,21 @@ export default function Dashboard({ user, setUser }) {
   const [showHistory, setShowHistory] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [dailyResult, setDailyResult] = useState(undefined); // undefined=loading, null=not done, object=done
+  const [rafflePoints, setRafflePoints] = useState(null);
 
-  // Check if daily challenge already completed today
+  // Check if daily challenge already completed today and fetch raffle points
   useEffect(() => {
     if (user?.uid) {
       hasDoneDailyChallenge(user.uid).then(result => {
         setDailyResult(result);
       }).catch(() => setDailyResult(null));
+
+      getUserRafflePoints(user.uid).then(pts => {
+        setRafflePoints(pts);
+      }).catch(err => {
+        console.error(err);
+        setRafflePoints(0);
+      });
     }
   }, [user?.uid]);
 
@@ -198,11 +206,25 @@ export default function Dashboard({ user, setUser }) {
           <p className="level-progress-text">{levelProgress}/100 XP to Level {level + 1} • {xpNeeded} XP needed</p>
         </div>
 
-        <div className="paper-card hoverable flex-1 p-4">
-          <div className="stat-label">
-            <span className="text-error">🔥</span> Streak
+        <div className="paper-card hoverable flex-1 p-4" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div>
+            <div className="stat-label">
+              <span className="text-error">🔥</span> Streak
+            </div>
+            <div className="stat-value">{user.streak || 0} Days</div>
           </div>
-          <div className="stat-value">{user.streak || 0} Days</div>
+          
+          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+            <div className="stat-label">
+              <span>🎟️</span> Raffle Points
+            </div>
+            <div className="stat-value" style={{ color: '#D97706' }}>
+              {rafflePoints !== null ? rafflePoints : '...'}
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0.25rem 0 0 0' }}>
+              +1 per leaderboard &amp; +1 for top 3 daily
+            </p>
+          </div>
         </div>
       </div>
 
