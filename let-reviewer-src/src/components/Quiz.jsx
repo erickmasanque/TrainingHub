@@ -154,7 +154,7 @@ export default function Quiz({
               ⏱️ {formatTime(elapsedTime)}
             </div>
           )}
-          <button onClick={onBack} className="btn-light btn-small">Quit</button>
+          {!isDailyChallenge && <button onClick={onBack} className="btn-light btn-small">Quit</button>}
         </div>
       </header>
 

@@ -12,7 +12,7 @@ import AttemptHistory from './AttemptHistory';
 import Leaderboard from './Leaderboard';
 import MiniLeaderboard from './MiniLeaderboard';
 import { getLevel, getLevelProgress, xpToNextLevel } from '../services/levels';
-import { hasDoneDailyChallenge, getUserRafflePoints } from '../services/db';
+import { hasDoneDailyChallenge, getUserRafflePoints, startDailyChallenge } from '../services/db';
 
 export default function Dashboard({ user, setUser }) {
   const [activeCluster, setActiveCluster] = useState(null);
@@ -27,6 +27,50 @@ export default function Dashboard({ user, setUser }) {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [dailyResult, setDailyResult] = useState(undefined); // undefined=loading, null=not done, object=done
   const [rafflePoints, setRafflePoints] = useState(null);
+  const [prizeMessage, setPrizeMessage] = useState(null);
+  const [adminPrizeShown, setAdminPrizeShown] = useState(false);
+
+  // Daily Prize Roll (once per day)
+  useEffect(() => {
+    if (!user) return;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const lastRolled = localStorage.getItem(`prizeRolled_${user.uid}`);
+    
+    // Admin bypass: only block if we already showed it THIS specific page load
+    if (user.email === 'erickmasanque@gmail.com') {
+      if (adminPrizeShown) return;
+    } else {
+      // Normal users: strictly once per day
+      if (lastRolled === today) return;
+    }
+
+    const r = Math.random();
+    let won = null;
+    
+    // Force win for testing if admin
+    if (user.email === 'erickmasanque@gmail.com') {
+      won = '₱50.00';
+    } else {
+      if (r < 0.01) won = '₱20.00';
+      else if (r < 0.06) won = '₱10.00';
+      else if (r < 0.16) won = '₱5.00';
+    }
+    
+    if (won) {
+      const phTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"});
+      setPrizeMessage({
+        prize: won,
+        timestamp: phTime
+      });
+      localStorage.setItem(`prizeRolled_${user.uid}`, today);
+      if (user.email === 'erickmasanque@gmail.com') {
+        setAdminPrizeShown(true);
+      }
+    } else {
+      localStorage.setItem(`prizeRolled_${user.uid}`, today);
+    }
+  }, [user, adminPrizeShown]);
 
   // Check if daily challenge already completed today and fetch raffle points
   useEffect(() => {
@@ -203,7 +247,7 @@ export default function Dashboard({ user, setUser }) {
           <div className="progress-bg" style={{ height: '10px', marginTop: '0.75rem' }}>
             <div className="progress-fill" style={{ width: `${levelProgress}%` }}></div>
           </div>
-          <p className="level-progress-text">{levelProgress}/100 XP to Level {level + 1} • {xpNeeded} XP needed</p>
+          <p className="level-progress-text">{levelProgress}% to Level {level + 1} • {xpNeeded} XP needed</p>
         </div>
 
         <div className="paper-card hoverable flex-1 p-4" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -233,15 +277,20 @@ export default function Dashboard({ user, setUser }) {
         <h3>Daily Challenge</h3>
         {dailyResult ? (
           <>
-            <p className="text-success bold" style={{ fontSize: '1.1rem', margin: '0.5rem 0' }}>✅ Completed Today!</p>
+            {dailyResult.status === 'started' ? (
+              <p className="text-error bold" style={{ fontSize: '1.1rem', margin: '0.5rem 0' }}>❌ Challenge Abandoned!</p>
+            ) : (
+              <p className="text-success bold" style={{ fontSize: '1.1rem', margin: '0.5rem 0' }}>✅ Completed Today!</p>
+            )}
             <p>You scored <strong>{dailyResult.score}%</strong> ({dailyResult.correctAnswers}/{dailyResult.totalQuestions}) in {Math.floor((dailyResult.timeSpentSeconds || 0) / 60)}m {(dailyResult.timeSpentSeconds || 0) % 60}s</p>
           </>
         ) : (
           <>
             <p>7 global speedrun questions. Same for everyone today!</p>
-            <button className="btn-light" onClick={() => {
+            <button className="btn-light" onClick={async () => {
               setIsDailyChallenge(true);
               setActiveCluster('General Education');
+              await startDailyChallenge(user.uid, user.nickname || user.name);
             }} disabled={dailyResult === undefined}>{
               dailyResult === undefined ? 'Checking...' : 'Start Speedrun'
             }</button>
@@ -296,6 +345,45 @@ export default function Dashboard({ user, setUser }) {
       </div>
 
       {user.email === 'erickmasanque@gmail.com' && <Seeder />}
+
+      {/* Prize Modal */}
+      {prizeMessage && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          padding: '1rem'
+        }}>
+          <div className="paper-card" style={{ 
+            textAlign: 'center', 
+            maxWidth: '400px', 
+            width: '100%',
+            position: 'relative'
+          }}>
+            <h2 style={{ fontSize: '2rem', margin: '0 0 1rem 0', color: '#166534' }}>🎉 YOU WON! 🎉</h2>
+            <p className="subtitle" style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>
+              You received a lucky login bonus!
+            </p>
+            <div style={{ background: '#f0fdf4', color: '#166534', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', border: '2px dashed #4ade80' }}>
+              <h1 style={{ fontSize: '3rem', margin: 0 }}>{prizeMessage.prize}</h1>
+            </div>
+            <div style={{ textAlign: 'left', background: '#f8fafc', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', color: '#333' }}>
+              <p><strong>Username:</strong> {user.nickname || user.name}</p>
+              <p><strong>Time (PH):</strong> {prizeMessage.timestamp}</p>
+            </div>
+            <p style={{ color: '#b91c1c', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+              <strong>IMPORTANT:</strong> Screenshot this window right now showing your username and timestamp, and send it to the admin to claim your prize!
+            </p>
+            <button className="btn-primary" onClick={() => setPrizeMessage(null)} style={{ width: '100%' }}>
+              I have taken a screenshot
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
