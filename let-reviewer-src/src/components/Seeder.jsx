@@ -17,8 +17,14 @@ export default function Seeder() {
 
     try {
       const text = await file.text();
-      const count = await seedQuestionsFromCSVText(text);
-      setResult(`Success! Uploaded ${count} questions to Firestore.`);
+      const { count, skipped } = await seedQuestionsFromCSVText(text);
+      let message = `Success! Uploaded ${count} questions to Firestore.`;
+      if (skipped.length > 0) {
+        const details = skipped.slice(0, 10).map(s => `line ${s.line} (${s.reason})`).join(', ');
+        const more = skipped.length > 10 ? ` and ${skipped.length - 10} more` : '';
+        message += ` Skipped ${skipped.length}: ${details}${more}.`;
+      }
+      setResult(message);
     } catch (error) {
       console.error(error);
       setResult("Error uploading questions. See console.");

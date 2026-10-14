@@ -385,10 +385,8 @@ export async function generateMockExam(itemCount = 150) {
 
   for (let question of allQs) {
     const cluster = question.cluster || question.subject;
-    if (!targetQuotas[cluster]) {
-      unselected.push(question);
-      continue;
-    }
+    // Mock exam is General Education only; skip Prof Ed and unknown clusters
+    if (!targetQuotas[cluster]) continue;
 
     let bloom = question.bloomsLevel ? question.bloomsLevel.trim().toLowerCase() : "apply";
     bloom = bloom.charAt(0).toUpperCase() + bloom.slice(1);
@@ -467,67 +465,107 @@ export async function getDailyChallengeQuestions(limit = 7) {
 }
 
 // SEEDING UTILITY
+
+// Firestore rejects batches over 500 writes, so uploads are committed in chunks.
+const SEED_BATCH_SIZE = 450;
+const VALID_ANSWERS = ['A', 'B', 'C', 'D'];
+
+// RFC 4180-style CSV parser: handles quoted fields, "" escapes inside quotes,
+// commas and line breaks inside quotes, and \r\n line endings.
+export function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  const src = text.replace(/^\uFEFF/, ''); // strip Excel's UTF-8 BOM
+
+  for (let i = 0; i < src.length; i++) {
+    const char = src[i];
+    if (inQuotes) {
+      if (char === '"' && src[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        field += char;
+      }
+    } else if (char === '"') {
+      inQuotes = true;
+    } else if (char === ',') {
+      row.push(field);
+      field = '';
+    } else if (char === '\n' || char === '\r') {
+      if (char === '\r' && src[i + 1] === '\n') i++;
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+    } else {
+      field += char;
+    }
+  }
+  if (field !== '' || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows.filter(r => r.some(v => v.trim() !== ''));
+}
+
+// Returns { count, skipped: [{ line, reason }] }
 export async function seedQuestionsFromCSVText(csvText) {
-  const lines = csvText.split('\n').filter(line => line.trim() !== '');
-  
-  const batch = writeBatch(db);
+  const rows = parseCSV(csvText);
   const questionsRef = collection(db, "questions");
 
-  let count = 0;
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    const values = [];
-    let currentVal = '';
-    let inQuotes = false;
-    
-    for (let j = 0; j < line.length; j++) {
-      const char = line[j];
-      if (char === '"' && line[j+1] === '"') {
-        currentVal += '"';
-        j++; // skip escaped quote
-      } else if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        values.push(currentVal);
-        currentVal = '';
-      } else {
-        currentVal += char;
-      }
+  // Calculate relative difficulty based on Bloom's level
+  const bloomsMap = {
+    'remember': 1, 'understand': 2, 'apply': 3, 'analyze': 4, 'evaluate': 5, 'create': 5
+  };
+
+  const docs = [];
+  const skipped = [];
+
+  // Row 0 is the header
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i].map(v => v.trim());
+    const line = i + 1;
+
+    // CSV format: Number, Subject, Bloom, Question, Choice A, Choice B, Choice C, Choice D, Answer, Explanation
+    const [, subject, bloom, question_text, choice_a, choice_b, choice_c, choice_d, answer = '', explanation = ''] = values;
+    const correctAnswer = answer.toUpperCase();
+
+    if (values.length < 9) {
+      skipped.push({ line, reason: `only ${values.length} columns` });
+      continue;
     }
-    values.push(currentVal);
+    if (!subject || !question_text || !choice_a || !choice_b || !choice_c || !choice_d) {
+      skipped.push({ line, reason: 'missing topic, question or a choice' });
+      continue;
+    }
+    if (!VALID_ANSWERS.includes(correctAnswer)) {
+      skipped.push({ line, reason: `answer "${answer}" is not A-D` });
+      continue;
+    }
 
-    if (values.length < 8) continue;
-
-    // Based on user's CSV format: Number, Subject, Bloom, Question, Choice A, Choice B, Choice C, Choice D, Answer, Explanation
-    const [, subject, bloom, question_text, choice_a, choice_b, choice_c, choice_d, answer, explanation] = values;
-
-    // Calculate relative difficulty based on Bloom's level
-    const bloomsMap = {
-      'remember': 1, 'understand': 2, 'apply': 3, 'analyze': 4, 'evaluate': 5, 'create': 5
-    };
-    const difficulty = bloomsMap[bloom?.trim().toLowerCase()] || 3;
-
-    const docRef = doc(questionsRef);
-    batch.set(docRef, {
-      cluster: subject?.trim(), // The app queries by 'cluster', but the CSV calls it 'Subject'
-      subject: subject?.trim(),
-      questionText: question_text?.trim(),
-      choices: {
-        A: choice_a?.trim(),
-        B: choice_b?.trim(),
-        C: choice_c?.trim(),
-        D: choice_d?.trim()
-      },
-      correctAnswer: answer?.trim().toUpperCase(),
-      explanation: explanation?.trim() || "",
-      bloomsLevel: bloom?.trim() || "Apply",
-      relativeDifficulty: difficulty,
+    docs.push({
+      cluster: subject, // The app queries by 'cluster', but the CSV calls it 'Subject'
+      subject,
+      questionText: question_text,
+      choices: { A: choice_a, B: choice_b, C: choice_c, D: choice_d },
+      correctAnswer,
+      explanation,
+      bloomsLevel: bloom || "Apply",
+      relativeDifficulty: bloomsMap[bloom?.toLowerCase()] || 3,
       timesAttempted: 0,
       timesCorrectFirstTry: 0
     });
-    count++;
   }
 
-  await batch.commit();
-  return count;
+  for (let start = 0; start < docs.length; start += SEED_BATCH_SIZE) {
+    const batch = writeBatch(db);
+    docs.slice(start, start + SEED_BATCH_SIZE).forEach(data => batch.set(doc(questionsRef), data));
+    await batch.commit();
+  }
+
+  return { count: docs.length, skipped };
 }
