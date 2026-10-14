@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { updateUserXP, recordUserActivity, recordQuestionStats, saveAttempt, submitLeaderboardEntry } from '../services/db';
-import { getLevel, getLevelProgress } from '../services/levels';
 
 export default function Results({ questions, answers, time, user, onBack, onCompleteUpdate, mode, cluster }) {
   const [xpEarned, setXpEarned] = useState(0);
-  const [newStreak, setNewStreak] = useState(user?.streak || 0);
   const updatedRef = useRef(false);
 
   const correctAnswersCount = questions.reduce((acc, q) => {
@@ -31,9 +29,7 @@ export default function Results({ questions, answers, time, user, onBack, onComp
 
       // Record user activity (streak, hidden analytics)
       const timeSpent = time || 0;
-      recordUserActivity(user.uid, questions.length, timeSpent).then(streak => {
-        if (streak !== undefined) setNewStreak(streak);
-      }).catch(err =>
+      recordUserActivity(user.uid, questions.length, timeSpent).catch(err =>
         console.error("Failed to record user activity:", err)
       );
 

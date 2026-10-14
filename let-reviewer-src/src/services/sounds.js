@@ -24,7 +24,7 @@ function playTone(frequency, duration, type = 'sine', volume = 0.3, delay = 0) {
     
     osc.start(ctx.currentTime + delay);
     osc.stop(ctx.currentTime + delay + duration);
-  } catch (e) {
+  } catch {
     // Silently fail if audio isn't available
   }
 }
@@ -49,7 +49,7 @@ function playNoise(duration, volume = 0.1) {
     source.connect(gain);
     gain.connect(ctx.destination);
     source.start();
-  } catch (e) {
+  } catch {
     // Silently fail
   }
 }

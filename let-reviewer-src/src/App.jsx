@@ -36,7 +36,7 @@ function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={
-          !user ? <Landing onLogin={(u) => { /* Let onAuthStateChanged handle it */ }} /> : 
+          !user ? <Landing onLogin={() => { /* Let onAuthStateChanged handle it */ }} /> : 
           (!user.nickname ? <Onboarding user={user} onComplete={handleOnboardingComplete} /> :
           <Dashboard user={user} setUser={setUser} />)
         } />

@@ -59,6 +59,7 @@ export default function Dashboard({ user, setUser }) {
     
     if (won) {
       const phTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"});
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time roll from localStorage + Math.random
       setPrizeMessage({
         prize: won,
         timestamp: phTime

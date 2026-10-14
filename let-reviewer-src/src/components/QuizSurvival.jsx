@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getEndlessQuestions } from '../services/db';
 import BubbleSheet from './BubbleSheet';
 import ReportButton from './ReportButton';
-import { playClick, playCorrect, playWrong, playTimeout, playGameOver, playLifeGained, playStreak, playTimerTick } from '../services/sounds';
+import { playClick, playCorrect, playWrong, playTimeout, playGameOver, playLifeGained, playStreak } from '../services/sounds';
 
 const SECONDS_PER_QUESTION = 30;
 const LIFE_MILESTONES = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95];
@@ -38,24 +38,17 @@ export default function QuizSurvival({ cluster, onBack, onComplete, userId = nul
     load();
   }, [cluster]);
 
-  // Question timer + elapsed time
-  useEffect(() => {
-    if (loading || questions.length === 0 || gameOver || showFeedback) return;
-
-    const timerId = setInterval(() => {
-      setElapsedTime(prev => prev + 1);
-      setQuestionTimer(prev => {
-        if (prev <= 1) {
-          // Time's up for this question — treat as wrong
-          handleTimeout();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timerId);
-  }, [loading, questions.length, gameOver, showFeedback, currentIndex]);
+  const advanceQuestion = useCallback(() => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= questions.length) {
+      // Ran out of questions — they win!
+      setGameOver(true);
+    } else {
+      setCurrentIndex(nextIndex);
+      setQuestionTimer(SECONDS_PER_QUESTION);
+      setSelectedAnswer('');
+    }
+  }, [currentIndex, questions.length]);
 
   const handleTimeout = useCallback(() => {
     playTimeout();
@@ -75,19 +68,26 @@ export default function QuizSurvival({ cluster, onBack, onComplete, userId = nul
       setShowFeedback(null);
       advanceQuestion();
     }, 1500);
-  }, [lives, currentIndex, questions]);
+  }, [lives, advanceQuestion]);
 
-  const advanceQuestion = useCallback(() => {
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= questions.length) {
-      // Ran out of questions — they win!
-      setGameOver(true);
-    } else {
-      setCurrentIndex(nextIndex);
-      setQuestionTimer(SECONDS_PER_QUESTION);
-      setSelectedAnswer('');
-    }
-  }, [currentIndex, questions.length]);
+  // Question timer + elapsed time
+  useEffect(() => {
+    if (loading || questions.length === 0 || gameOver || showFeedback) return;
+
+    const timerId = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+      setQuestionTimer(prev => {
+        if (prev <= 1) {
+          // Time's up for this question — treat as wrong
+          handleTimeout();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [loading, questions.length, gameOver, showFeedback, currentIndex, handleTimeout]);
 
   const handleSubmit = () => {
     if (!selectedAnswer || showFeedback) return;

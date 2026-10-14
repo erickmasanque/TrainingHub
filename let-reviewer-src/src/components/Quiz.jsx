@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getQuestionsByCluster, generateMockExam, getDailyChallengeQuestions, getHardestQuestions } from '../services/db';
 import BubbleSheet from './BubbleSheet';
 import ReportButton from './ReportButton';
-import { playClick, playNext, playFinish, playTimerTick } from '../services/sounds';
+import { playClick, playNext, playFinish } from '../services/sounds';
 
 export default function Quiz({ 
   cluster, onBack, onComplete, itemCount = 20, 
@@ -74,13 +74,15 @@ export default function Quiz({
     }, 1000);
 
     return () => clearInterval(timerId);
-  }, [loading, questions.length]);
+  }, [loading, questions.length, initialTimeLimit]);
 
   // Auto-submit when countdown timer runs out
   useEffect(() => {
     if (timeLeft !== null && timeLeft <= 0 && questions.length > 0) {
       onComplete(questions, answers, elapsedTime);
     }
+    // Only fire on countdown change; adding the others would re-submit every tick
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft]);
 
   const handleNext = () => {

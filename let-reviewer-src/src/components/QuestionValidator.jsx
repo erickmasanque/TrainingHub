@@ -113,7 +113,7 @@ export default function QuestionValidator() {
         textMap[normalizedText].push(q);
       });
 
-      Object.entries(textMap).forEach(([text, dupes]) => {
+      Object.entries(textMap).forEach(([, dupes]) => {
         if (dupes.length > 1) {
           dupes.forEach(q => {
             // Check if already in found[]

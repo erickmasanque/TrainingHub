@@ -469,7 +469,6 @@ export async function getDailyChallengeQuestions(limit = 7) {
 // SEEDING UTILITY
 export async function seedQuestionsFromCSVText(csvText) {
   const lines = csvText.split('\n').filter(line => line.trim() !== '');
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
   
   const batch = writeBatch(db);
   const questionsRef = collection(db, "questions");
@@ -500,7 +499,7 @@ export async function seedQuestionsFromCSVText(csvText) {
     if (values.length < 8) continue;
 
     // Based on user's CSV format: Number, Subject, Bloom, Question, Choice A, Choice B, Choice C, Choice D, Answer, Explanation
-    const [number, subject, bloom, question_text, choice_a, choice_b, choice_c, choice_d, answer, explanation] = values;
+    const [, subject, bloom, question_text, choice_a, choice_b, choice_c, choice_d, answer, explanation] = values;
 
     // Calculate relative difficulty based on Bloom's level
     const bloomsMap = {

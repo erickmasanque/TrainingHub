@@ -25,6 +25,8 @@ export default function Landing({ onLogin }) {
         }
       })
       .finally(() => setLoading(false));
+    // Redirect result is checked once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGoogleLogin = async () => {

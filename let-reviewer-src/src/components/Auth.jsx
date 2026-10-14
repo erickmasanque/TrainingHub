@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithPopup } from 'firebase/auth';
 
 export default function Auth({ onLogin }) {
   const [error, setError] = useState(null);

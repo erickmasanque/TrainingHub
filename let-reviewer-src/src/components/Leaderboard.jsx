@@ -58,13 +58,6 @@ export default function Leaderboard({ user, onBack }) {
     load();
   }, [activeTab, activeCluster]);
 
-  // Reset cluster filter when switching to a tab without categories
-  useEffect(() => {
-    if (currentTabConfig && !currentTabConfig.hasCategories) {
-      setActiveCluster('');
-    }
-  }, [activeTab]);
-
   const formatTime = (seconds) => {
     if (!seconds) return '—';
     const m = Math.floor(seconds / 60);
@@ -88,7 +81,11 @@ export default function Leaderboard({ user, onBack }) {
           <button
             key={tab.id}
             className={`lb-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              // Reset cluster filter when switching to a tab without categories
+              if (!tab.hasCategories) setActiveCluster('');
+            }}
           >
             {tab.label}
           </button>
