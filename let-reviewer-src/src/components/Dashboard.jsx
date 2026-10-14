@@ -242,7 +242,7 @@ export default function Dashboard({ user, setUser }) {
 
       {/* Review Categories */}
       <div className="mb-4">
-        <h2 className="section-title">Review Categories</h2>
+        <h2 className="section-title">General Education</h2>
         <div className="grid-cols-2">
 
           <div className="cat-card bg-cat-blue" onClick={() => setModeSelector('Intellectual Competencies')}>
@@ -265,6 +265,15 @@ export default function Dashboard({ user, setUser }) {
             <h4 className="cat-title">Mock Exam</h4>
           </div>
 
+        </div>
+      </div>
+
+      {/* Professional Education */}
+      <div className="mb-4">
+        <h2 className="section-title">Professional Education</h2>
+        <div className="cat-card bg-cat-amber" onClick={() => setModeSelector('Professional Education')}>
+          <div className="cat-icon-container icon-cat-amber">📚</div>
+          <h4 className="cat-title">Professional Education</h4>
         </div>
       </div>
 

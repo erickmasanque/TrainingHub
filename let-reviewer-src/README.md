@@ -35,6 +35,7 @@ Questions are meticulously categorized to cover core LET competencies:
 - 🧠 **Intellectual Competencies**
 - 🏛️ **Personal & Civic Responsibilities**
 - 🛠️ **Practical Skills Development**
+- 📚 **Professional Education**
 
 ### 4. Daily Challenges & Competitive Leaderboards
 - **Global Daily Challenge:** A 7-question speedrun that is identical for every user on a given day. Features a specialized "Top 3" daily leaderboard.

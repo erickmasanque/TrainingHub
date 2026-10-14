@@ -31,6 +31,9 @@
   --color-cat-purple-bg: #EDE6F4;
   --color-cat-purple-icon: #D7CBE8;
 
+  --color-cat-amber-bg: #FBF0DD;
+  --color-cat-amber-icon: #F3DDB4;
+
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   
   /* Softer Shadows */
@@ -332,11 +335,13 @@ button {
 .bg-cat-pink { background: var(--color-cat-pink-bg); }
 .bg-cat-green { background: var(--color-cat-green-bg); }
 .bg-cat-purple { background: var(--color-cat-purple-bg); }
+.bg-cat-amber { background: var(--color-cat-amber-bg); }
 
 .icon-cat-blue { background: var(--color-cat-blue-icon); color: #2563EB; }
 .icon-cat-pink { background: var(--color-cat-pink-icon); color: #DC2626; }
 .icon-cat-green { background: var(--color-cat-green-icon); color: #16A34A; }
 .icon-cat-purple { background: var(--color-cat-purple-icon); color: #9333EA; }
+.icon-cat-amber { background: var(--color-cat-amber-icon); color: #B45309; }
 
 .cat-title { margin: 0; color: var(--color-text-main); }
 

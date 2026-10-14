@@ -16,7 +16,8 @@ const CLUSTERS = [
   { id: '', label: 'All Categories' },
   { id: 'Intellectual Competencies', label: '🧠 Intellectual' },
   { id: 'Personal & Civic Responsibilities', label: '🏛️ Civic' },
-  { id: 'Practical Skills Development', label: '🛠️ Practical' }
+  { id: 'Practical Skills Development', label: '🛠️ Practical' },
+  { id: 'Professional Education', label: '📚 Prof Ed' }
 ];
 
 const MEDAL = ['🥇', '🥈', '🥉'];
