@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { seedQuestionsFromCSVText } from '../services/db';
 import QuestionValidator from './QuestionValidator';
+import AdminTicketsView from './AdminTicketsView';
+import AdminUserExport from './AdminUserExport';
 
 export default function Seeder() {
   const [loading, setLoading] = useState(false);
@@ -47,6 +49,9 @@ export default function Seeder() {
       </div>
       
       {showValidator && <QuestionValidator />}
+      
+      <AdminTicketsView />
+      <AdminUserExport />
     </div>
   );
 }
