@@ -21,7 +21,6 @@ The app features a unique **"Paper and Pen" aesthetic**:
 ### 1. Gamified Progression System
 - **Experience Points (XP) & Levels:** Users earn XP for every question answered correctly. Accumulating XP increases the user's level, providing a tangible sense of progression.
 - **Daily Streaks:** Maintaining a daily login and review habit increases a user's streak, encouraging consistent study sessions.
-- **Raffle Points:** A unique reward system where users earn raffle tickets by placing on leaderboards or participating in daily challenges.
 
 ### 2. Comprehensive Study Modes
 To cater to different review strategies and time constraints, the app offers multiple game modes:
@@ -44,7 +43,6 @@ Questions are meticulously categorized to cover core LET competencies:
 
 ### 5. Performance Tracking & Analytics
 - **Attempt History:** Users can look back at their previous quiz attempts, review their scores, and identify weak points to improve upon.
-- **Daily Prize Roll:** A lucky daily login bonus mechanic where users have a chance to win small real-world rewards, requiring screenshot verification.
 
 ## 🛠️ Technology Stack
 
